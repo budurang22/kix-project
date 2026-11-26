@@ -20,7 +20,7 @@
 
 | 항목 | 이유 |
 | --- | --- |
-| SessionStart hook 출력이 Claude 컨텍스트에 들어오는가 | 이번 세션 도중에 설정을 추가해서 시작 시점 출력을 관찰할 수 없었다. 공식 문서는 SessionStart의 stdout이 컨텍스트에 추가된다고 설명한다. |
+| ~~SessionStart hook 출력이 Claude 컨텍스트에 들어오는가~~ | **확인됨 (2026-11-28)**: 세션을 `/exit` 후 재개했을 때 `SessionStart:resume hook success` 메시지와 함께 Git 상태, `progress.md`, `decisions.md` 최근 내용이 Claude 컨텍스트에 들어왔다. 확인한 matcher는 `resume`뿐이다. `startup`, `clear`, `compact`는 아직 확인하지 못했다. |
 | `/wrap-up` 스킬 동작 | `disable-model-invocation: true`라서 사용자만 호출할 수 있다. |
 | Notion `ask` 규칙 | Notion 쓰기 도구를 실제로 호출해야 해서 시험하지 않았다. `ask` JSON 키는 공식 문서에서 산문 설명만 확인했다. |
 | `paths` 규칙(`backend.md` 등)의 로딩 | 대상 파일이 아직 없다. 해당 파일을 Read/Write/Edit할 때 로드된다고 문서에 있다. |

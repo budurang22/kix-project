@@ -6,7 +6,7 @@
 
 AI 협업 환경과 공통 규칙 구성은 **마무리**했다. 신규 기술 도입은 중단했고(DEC-024) 개발을 시작한다.
 **개발자가 직접 구현하는 학습 모드**(DEC-013)이며 핵심 주문 도메인에만 부분 TDD를 적용한다(DEC-023).
-구현 완료: 없음. 학습 완료: 없음. 다음은 **첫 Git 커밋과 브랜치 생성**(학습 단계 1)이다. 마감은 2026-11-30이다.
+구현 완료: 최초 커밋(`b4fe499`), `develop`·`feature/project-init` 브랜치, GitHub Private 저장소 `kix-project` 연결과 첫 push (개발자가 직접 수행, 읽기 전용으로 확인). 학습 완료: 없음. 다음은 **JDK 21 환경 설정**(학습 단계 3)이다. 마감은 2026-11-30이다.
 
 ## 2. 확정된 것 (DEC-024)
 
@@ -48,7 +48,8 @@ AI 협업 환경과 공통 규칙 구성은 **마무리**했다. 신규 기술 �
 
 ## 6. 미해결 사항
 
-- SessionStart hook, `/wrap-up`, Notion `ask`, `paths` 규칙의 실제 동작 (`ai-env-verification.md`)
+- SessionStart hook은 `resume`에서 동작 확인(2026-11-28). `startup`·`clear`·`compact`, `/wrap-up`, Notion `ask`, `paths` 규칙은 미확인 (`ai-env-verification.md`)
+- 원격 저장소: 최초 push가 `Repository not found`로 실패했으나 저장소 이름을 `kix-project`로 맞춰 해결 (2026-11-28 확인). 커밋 전 변경: `.claude/hooks/guard.py`(읽기 전용 `git check-ignore` 허용), `docs/ai-env-verification.md`, `docs/progress.md` — 별도 커밋 필요
 - 공식 문서로 확인하지 못한 항목: `references.md` 7.5장, 8.1장
 - 디자인 시안 제작·승인 (`design/approved.md` 전부 "시안 없음")
 - 일정: 마감 2026-11-30까지 3일. 학습 목적을 우선하고 선택 기능부터 제외한다.
