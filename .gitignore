@@ -1,0 +1,32 @@
+# 비밀값
+.env
+.env.*
+!.env.example
+application-secret*.properties
+*.pem
+*.key
+
+# Claude Code 개인 설정
+CLAUDE.local.md
+.claude/settings.local.json
+
+# 백엔드
+backend/build/
+backend/.gradle/
+backend/target/
+*.class
+*.log
+
+# 프론트엔드
+frontend/node_modules/
+frontend/dist/
+
+# 인프라
+infra/data/
+infra/mysql-data/
+
+# IDE, OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
