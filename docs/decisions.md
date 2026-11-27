@@ -361,3 +361,20 @@ Claude는 코드·설정·테스트 실행·Git·배포를 직접 하지 않는�
 - 결정: ① 브랜드는 별도 `brands` 테이블로 분리 ② `size_mm`은 150~350 정수(5mm 단위 검증은 앱에서) ③ 주문에 `product_name`, `size_mm` 스냅샷 저장 ④ 주문 상태는 `ORDERED`로 시작(CHECK는 `ORDERED`/`CANCELED` 허용, 취소는 선택 기능)
 - DDL: `backend/src/main/resources/db/migration/V1__init.sql` (Flyway 보류라 자동 실행하지 않고 DBeaver로 직접 실행). 사용자가 시간 부족을 이유로 DDL 전문을 요청해 Claude가 대화로 전체 예시를 제공했고, 파일 작성·실행은 개발자가 한다.
 - FK 컬럼에는 별도 `idx_`를 만들지 않는다(InnoDB가 자동 생성한다는 일반 지식, 확인 안 함). 이전 문서의 `idx_products_brand_id`는 제외.
+
+## DEC-028. JWT는 oauth2-resource-server로 발급·검증
+
+- 상태: 확정 (2026-11-27, 사용자 "기본 회원가입 + oauth2 사용" 선택). 회원가입은 기존 이메일·비밀번호 방식을 유지한다. 소셜 로그인(구글·카카오 등)은 범위에 넣지 않는다(필요하면 별도 협의).
+- 결정: Spring Security의 OAuth2 Resource Server 기능(Nimbus JWT)으로 JWT를 **발급(`JwtEncoder`)** 하고 **검증(`JwtDecoder`)** 한다. 인증 정책(DEC-024: 60분, Bearer, Stateless, Refresh 제외)은 그대로다.
+- 의존성: `org.springframework.boot:spring-boot-starter-security-oauth2-resource-server` (버전은 Boot 관리). 옛 이름 `spring-boot-starter-oauth2-resource-server`는 4.2.0 POM 설명에 "deprecated in favor of spring-boot-starter-security-oauth2-resource-server"로 표시되어 있다 (Maven Central POM 직접 확인, 2026-11-27). 두 아티팩트 모두 4.2.0이 존재한다.
+- 대안(채택 안 함): jjwt, auth0 java-jwt (필터를 직접 만들어야 해서 코드가 길어짐).
+- 미확인: Resource Server 설정 문법과 HS256 대칭키 사용 시 세부(공식 문서 대조 전). 구현 중 확인해 `references.md`에 기록한다. 서명 비밀키는 `.env`로만 관리한다(`security.md`).
+- 구현 결과(2026-11-27, 개발자 직접 작성): `JwtConfig`(HS256 `JwtEncoder`·`JwtDecoder`), `JwtTokenProvider`(sub=회원 id, role, 만료 60분), 로그인 API, `RestSecurityExceptionHandler`(401·403), `JwtAuthenticationConverter`(role claim → `ROLE_`). 401/403은 `SecurityTest`(MockMvc)로 고정했다. 서명·만료 검증은 Postman으로 확인한다.
+- 시행착오: `@Value`의 `}` 누락(키가 리터럴 문자열이 되어 `KeyLengthException`), `.env`의 `JWT_SECRET` 빈 값(`Empty key`), 설정 키 이름 불일치(`jwt.expiration` ↔ `jwt.expiration-minutes`), 테스트 파일이 `src/main`에 위치.
+
+## DEC-029. 자동 테스트와 수동 시험 DB 분리는 배포 전에 정리
+
+- 상태: 제안 (2026-11-27)
+- 문제: 자동 테스트(`@SpringBootTest`)와 Postman 수동 시험이 같은 DB(`kix`)를 쓴다. 수동 시험으로 남은 `test@kix.com`이 `MemberRepositoryTest`를 `uk_members_email` 위반으로 실패시켰다(실제 발생, 원인은 DBeaver 수동 커밋 모드로 삭제가 반영되지 않은 것으로 추정).
+- 현재 방침: 수동 시험 계정은 쓴 뒤 지우고 DBeaver 트랜잭션 모드(Auto/Manual)를 확인한다.
+- 후속: 테스트 전용 DB 이름 사용(`testing.md` 4장) 또는 Testcontainers(선택)를 배포 전에 결정한다.
