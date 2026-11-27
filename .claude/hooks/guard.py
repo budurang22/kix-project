@@ -43,7 +43,7 @@ def check_edit(tool_input, cwd):
 
 
 GIT_READONLY = {
-    "status", "diff", "log", "show", "rev-parse", "ls-files", "blame", "describe",
+    "status", "diff", "log", "show", "rev-parse", "ls-files", "check-ignore", "blame", "describe",
     "shortlog", "reflog", "ls-tree", "cat-file", "grep", "version", "help",
     "--version", "-v",
 }
@@ -51,7 +51,7 @@ GIT_BRANCH_WRITE = {
     "-d", "-D", "-m", "-M", "-c", "-C", "-f", "-u", "--delete", "--move",
     "--copy", "--force", "--set-upstream-to", "--unset-upstream",
 }
-DOCKER_READONLY = {"--version", "version", "info", "ps", "images", "logs", "inspect", "stats", "ls"}
+DOCKER_READONLY = {"--version", "version", "info", "ps", "images", "logs", "inspect", "stats", "ls", "port"}
 COMPOSE_READONLY = {"version", "ps", "config", "ls", "logs", "images"}
 PACKAGE_READONLY = {"-v", "--version", "ls", "list", "view", "info", "outdated"}
 BREW_WRITE = {"install", "upgrade", "uninstall", "remove", "tap", "untap", "link", "unlink", "reinstall"}
