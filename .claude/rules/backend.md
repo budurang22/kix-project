@@ -6,7 +6,7 @@ paths:
 # 백엔드 컨벤션
 
 공식 참고: Google Java Style Guide https://google.github.io/styleguide/javaguide.html (기본). **들여쓰기는 예외로 4칸** (DEC-019).
-버전은 `docs/tech-stack.md`와 `docs/decisions.md`에서 확정된 값을 따른다. Spring Boot는 4.1.x 안정 버전(DEC-024)이고, Boot가 관리하는 의존성은 특별한 이유 없이 개별 버전을 지정하지 않는다. 스타터 이름은 Boot 4 기준(`spring-boot-starter-webmvc` 등, 4.0 마이그레이션 가이드)을 따른다.
+버전은 `docs/tech-stack.md`와 `docs/decisions.md`에서 확정된 값을 따른다. Spring Boot는 4.2.0(DEC-025, 4.1.3에서 변경)이고, Boot가 관리하는 의존성은 특별한 이유 없이 개별 버전을 지정하지 않는다. 스타터 이름은 Boot 4 기준(`spring-boot-starter-webmvc` 등, 4.0 마이그레이션 가이드)을 따른다.
 
 ## 1. 네이밍
 
@@ -30,6 +30,7 @@ paths:
 - 비즈니스 로직은 Service와 도메인 객체에서 처리하고 트랜잭션 범위를 명확히 한다. 공통 예외 처리를 둔다.
 - 하드코딩·중복 코드 지양. 불필요한 추상화와 과도한 디자인 패턴은 쓰지 않는다.
 - POJO 기반 객체지향 설계를 지향한다. 도메인 객체가 자기 규칙(재고 차감, 금액 계산)을 직접 관리하고(캡슐화), 서비스는 흐름을 조율한다. SOLID와 응집도·결합도를 고려하되 과하게 추상화하지 않는다.
+- **Lombok 사용 (DEC-026)**: 엔티티에는 `@Getter`, `@NoArgsConstructor(access = AccessLevel.PROTECTED)` 정도만 쓴다. `@Data`, `@Setter`, 엔티티의 `@EqualsAndHashCode`·`@ToString`은 쓰지 않는다 (일반 관행, 공식 문서로 확인 안 함). DTO는 `record`를 우선한다. `@RequiredArgsConstructor`는 생성자 주입을 직접 한두 번 작성해 원리를 확인한 뒤 사용한다.
 - IoC·DI는 생성자 주입으로, AOP는 `@Aspect`·`@Around` 실행 시간 측정을 일정에 따라 적용한다. PSA는 `@Transactional`이 JPA·JDBC 구현을 추상화하는 예로 트랜잭션 학습 단계에서 설명한다.
 - 가격은 서버에서 계산한다. 주문과 재고 차감은 한 트랜잭션이고 옵션 행은 `PESSIMISTIC_WRITE`로 잠근다.
 - 멱등성 키 충돌은 `@Transactional` 경계 바깥에서 잡고 별도 트랜잭션으로 기존 주문을 조회한다.
