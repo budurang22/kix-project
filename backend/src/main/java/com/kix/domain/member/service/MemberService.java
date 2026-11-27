@@ -2,6 +2,7 @@ package com.kix.domain.member.service;
 
 import com.kix.domain.member.entity.Member;
 import com.kix.domain.member.exception.DuplicateEmailException;
+import com.kix.domain.member.exception.InvalidCredentialsException;
 import com.kix.domain.member.repository.MemberRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,16 @@ public class MemberService {
             // 동시에 같은 이메일로 가입하면 DB 유니크 제약이 마지막으로 막는다
             throw new DuplicateEmailException();
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Member login(String email, String rawPassword) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(InvalidCredentialsException::new);
+
+        if (!passwordEncoder.matches(rawPassword, member.getPasswordHash())) {
+            throw new InvalidCredentialsException();
+        }
+        return member;
     }
 }
 
