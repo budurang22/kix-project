@@ -354,3 +354,10 @@ Claude는 코드·설정·테스트 실행·Git·배포를 직접 하지 않는�
 - 결정: Compose의 MySQL 컨테이너를 `127.0.0.1:3306`에 연결한다. 이 맥에서 이미 3306을 쓰던 Homebrew `mysql@8.4`는 중지한다(`brew services stop mysql@8.4`: 즉시 중지하고 로그인 시 자동 시작도 해제, 로컬 `brew services --help` 확인). 기존 데이터(`/opt/homebrew/var/mysql`)는 삭제되지 않는다.
 - 대안(채택 안 함): 컨테이너를 3307로 매핑해 기존 MySQL과 공존.
 - 주의: 기존 로컬 MySQL을 다시 써야 하면 `brew services start mysql@8.4`로 켜야 하며 KIX 컨테이너와 동시에 쓸 수 없다.
+
+## DB 설계 4항목 확정 (2026-11-28, 사용자 "추천대로")
+
+- 상태: 확정 (`design-revision-v1.2.md` 승인 현황의 ②③④와 상태 초기값)
+- 결정: ① 브랜드는 별도 `brands` 테이블로 분리 ② `size_mm`은 150~350 정수(5mm 단위 검증은 앱에서) ③ 주문에 `product_name`, `size_mm` 스냅샷 저장 ④ 주문 상태는 `ORDERED`로 시작(CHECK는 `ORDERED`/`CANCELED` 허용, 취소는 선택 기능)
+- DDL: `backend/src/main/resources/db/migration/V1__init.sql` (Flyway 보류라 자동 실행하지 않고 DBeaver로 직접 실행). 사용자가 시간 부족을 이유로 DDL 전문을 요청해 Claude가 대화로 전체 예시를 제공했고, 파일 작성·실행은 개발자가 한다.
+- FK 컬럼에는 별도 `idx_`를 만들지 않는다(InnoDB가 자동 생성한다는 일반 지식, 확인 안 함). 이전 문서의 `idx_products_brand_id`는 제외.

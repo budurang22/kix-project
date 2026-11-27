@@ -6,7 +6,7 @@
 
 AI 협업 환경과 공통 규칙 구성은 **마무리**했다. 신규 기술 도입은 중단했고(DEC-024) 개발을 시작한다.
 **개발자가 직접 구현하는 학습 모드**(DEC-013)이며 핵심 주문 도메인에만 부분 TDD를 적용한다(DEC-023).
-구현 완료: 최초 커밋(`b4fe499`), `develop`·`feature/project-init` 브랜치, GitHub Private 저장소 `kix-project` 연결과 첫 push (개발자가 직접 수행, 읽기 전용으로 확인). JDK 21 설정(학습 단계 3)과 IntelliJ(Spring Boot 마법사)로 백엔드 프로젝트 생성(학습 단계 4)을 마쳤고, Boot 빌드 성공을 확인했다(개발자 실행, 매니페스트로 검증). Boot 버전은 4.1.3으로 한 번 맞췄다가 **4.2.0으로 확정**했다(DEC-025). Lombok을 `build.gradle`에 추가했다(DEC-026). **로컬 MySQL Docker Compose(학습 단계 5) 완료**: `infra/docker-compose.yml`, mysql:8.4, `127.0.0.1:3306`, 볼륨 영속, 터미널에서 `SELECT VERSION()` 8.4.13과 `kix` DB 확인(개발자 실행). 기존 Homebrew MySQL과 이전 Docker 컨테이너(`mysql_db`)는 중지했다(DEC-027). 커밋·push는 확인 대기. 학습 완료: 없음. 다음은 **백엔드 DB 연결 설정**(학습 단계 6)이다. 마감은 2026-11-30이다.
+구현 완료: 최초 커밋(`b4fe499`), `develop`·`feature/project-init` 브랜치, GitHub Private 저장소 `kix-project` 연결과 첫 push (개발자가 직접 수행, 읽기 전용으로 확인). JDK 21 설정(학습 단계 3)과 IntelliJ(Spring Boot 마법사)로 백엔드 프로젝트 생성(학습 단계 4)을 마쳤고, Boot 빌드 성공을 확인했다(개발자 실행, 매니페스트로 검증). Boot 버전은 4.1.3으로 한 번 맞췄다가 **4.2.0으로 확정**했다(DEC-025). Lombok을 `build.gradle`에 추가했다(DEC-026). **로컬 MySQL Docker Compose(학습 단계 5) 완료**: `infra/docker-compose.yml`, mysql:8.4, `127.0.0.1:3306`, 볼륨 영속, 터미널에서 `SELECT VERSION()` 8.4.13과 `kix` DB 확인(개발자 실행). 기존 Homebrew MySQL과 이전 Docker 컨테이너(`mysql_db`)는 중지했다(DEC-027). 커밋·push는 확인 대기. 학습 완료: 없음. 백엔드 DB 연결 설정(학습 단계 6)은 `./gradlew cleanTest test` 성공으로 확인했다(`contextLoads` 통과, Hikari·JPA 기동). 다음은 **ERD/DDL**(학습 단계 7, 브랜치 `feature/db-schema`)이다. 마감은 2026-11-30이다.
 
 ## 2. 확정된 것 (DEC-024)
 

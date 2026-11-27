@@ -164,7 +164,7 @@
   - 문법: `[CONSTRAINT [symbol]] CHECK (expr) [[NOT] ENFORCED]`. 이름을 생략하면 MySQL이 `테이블명_chk_번호`로 자동 생성한다. 제약 이름은 최대 64자다. → `chk_` 이름을 직접 붙이면 이 길이 제한 안에서 만든다.
   - 생략하거나 `ENFORCED`이면 실제로 검사한다. `NOT ENFORCED`면 만들기만 하고 검사하지 않는다.
   - 식에는 서브쿼리, 변수, 저장 함수, `AUTO_INCREMENT` 컬럼, 다른 테이블의 컬럼을 쓸 수 없다. 외래키 참조 동작(`ON UPDATE`, `ON DELETE`)이 걸린 컬럼은 CHECK에 쓸 수 없다. → `stock >= 0`, `quantity >= 1`, `total_price = unit_price * quantity`는 이 제한에 걸리지 않는 컬럼들이다.
-  - 이전에 적었던 "MySQL 8.0.16부터 적용"은 이 페이지에서 확인되지 않았다. 버전 기준은 **미확인**으로 두고, 실제 MySQL 8.4 컨테이너에서 위반 시 오류가 나는지 직접 시험해서 기록한다.
+  - 이전에 적었던 "MySQL 8.0.16부터 적용"은 이 페이지에서 확인되지 않았다. 버전 기준은 **미확인**으로 두고, 실제 MySQL 8.4 컨테이너에서 위반 시 오류가 나는지 직접 시험해서 기록한다. → **확인됨 (2026-11-28, 개발자 실행)**: MySQL 8.4.13에서 `role`에 `'WRONG'`을 넣자 `SQL Error [3819] [HY000]: Check constraint 'chk_members_role' is violated.`, 같은 이메일 중복 시 `SQL Error [1062] [23000]: Duplicate entry 'a@a.com' for key 'members.uk_members_email'`가 났다. CHECK와 UNIQUE가 이름 그대로 동작한다.
 - 이 수정안에서 DDL은 작성하지 않았다. 승인 후 확정한다.
 
 ## 4. API 수정안
