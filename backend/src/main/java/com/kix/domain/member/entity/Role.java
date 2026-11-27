@@ -1,4 +1,5 @@
 package com.kix.domain.member.entity;
 
-public class Role {
+public enum Role {
+    USER, ADMIN
 }
