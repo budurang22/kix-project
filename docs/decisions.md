@@ -378,3 +378,23 @@ Claude는 코드·설정·테스트 실행·Git·배포를 직접 하지 않는�
 - 문제: 자동 테스트(`@SpringBootTest`)와 Postman 수동 시험이 같은 DB(`kix`)를 쓴다. 수동 시험으로 남은 `test@kix.com`이 `MemberRepositoryTest`를 `uk_members_email` 위반으로 실패시켰다(실제 발생, 원인은 DBeaver 수동 커밋 모드로 삭제가 반영되지 않은 것으로 추정).
 - 현재 방침: 수동 시험 계정은 쓴 뒤 지우고 DBeaver 트랜잭션 모드(Auto/Manual)를 확인한다.
 - 후속: 테스트 전용 DB 이름 사용(`testing.md` 4장) 또는 Testcontainers(선택)를 배포 전에 결정한다.
+
+## DEC-030. ChatGPT 병행 협업과 디자인 컨셉 승인
+
+- 상태: 확정 (2026-11-27, 사용자 지침). 승인일은 기록일 기준이며 ChatGPT에서 승인한 실제 날짜는 미확인.
+- 결정: 역할을 분담한다. 개발자는 의사결정·직접 코드·테스트·Git·배포, Claude Code는 개발 멘토링·리뷰·기록·승인된 디자인의 구현 안내, ChatGPT는 기획·기술 교차 검토와 브랜드·UI/UX·이미지·시안·포트폴리오를 맡는다. 공통 기준은 GitHub 저장소(`budurang22/kix-project`)와 `docs/`다.
+- 도구 간 메모리는 공유되지 않으므로 기존 `docs/` 파일과 `/wrap-up`으로 인수인계한다. 새 메모리 체계·Hook·설정은 만들지 않는다.
+- 디자인 컨셉(방향만 승인): 브랜드명 KIX, 슬로건 GET YOUR NEXT KICKS., #111111/#FFFFFF/#F4F4F4/#D5FA38/#EF4444, Pretendard 우선, 볼드 이탤릭 워드마크, 상품 카드 4/3/2열, 구매 버튼은 라임 배경+검은 텍스트. 상세는 `design/approved.md` 4장. 화면별 시안은 ChatGPT가 제작 예정이라 모두 "시안 없음" 유지.
+- 유지: 학습 모드(DEC-013), 브랜치 전략, 컨벤션, 공식 문서 기반 원칙. 시안 도착 전까지 백엔드를 계속한다(프런트 초기 환경 구성은 시안 없이 가능, `design-gate.md`).
+- 후속 검토(개발자 결정): 디자인 자료를 `docs/design-system` 브랜치로 분리 관리할지, 원본(`design/`)과 구현용 이미지(`frontend/`) 분리.
+- 영향: 요구사항에 없는 시안 속 기능은 개발자 확인 후에만 추가한다.
+
+## DEC-031. 역할 최종 분담: 프론트는 Codex, Claude Code는 백엔드 Learning Mode 유지 (DEC-030 보강)
+
+- 상태: 확정 (2026-11-28, 사용자 지시). "Claude Code가 프론트를 직접 구현"하는 안(검토만 하고 미적용)은 폐기했고 `settings.json`·가드의 프론트 차단은 그대로 유지한다.
+- 역할: 개발자 = 백엔드·DB·테스트·인프라·Git·배포 직접 수행 / Claude Code = 백엔드 학습 멘토링·코드 리뷰·기록 (프론트는 읽기 전용) / **Codex = `frontend/` 직접 개발 전담** / ChatGPT = 디자인, 기술 설계 교차 검토.
+- Codex는 별도 Git Worktree와 `feature/frontend-*` 브랜치에서 작업한다. Git 작업은 개발자가 한다.
+- API 계약: `docs/06-api-spec.md`가 프론트·백엔드의 기준이다. 인증은 JWT Bearer + React 메모리 저장(DEC-024) 유지.
+- 가드 변경(`guard.py`): ① 같은 저장소의 다른 worktree에도 동일한 수정 제한 적용 ② `cd`, 상대·절대 경로, `..`, 심볼릭 링크, `bash -c`·`eval`·`env` 래퍼, `find -delete`, 리다이렉션을 실경로로 판정. 검증: `.claude/hooks/test_guard.py`.
+- 범위: 이 가드는 Claude Code의 PreToolUse hook일 뿐이며 Codex·IDE·터미널을 제한하지 않는다.
+- 한계: `python -c`·`node -e` 같은 인라인 코드와 스크립트 파일 내부 동작은 정규식 수준으로만 거른다. 가드는 보안 경계가 아니라 실수 방지용이다.

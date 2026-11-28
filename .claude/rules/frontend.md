@@ -5,6 +5,8 @@ paths:
 
 # 프론트엔드 컨벤션
 
+> `frontend/`는 **Codex가 직접 개발**한다(DEC-031). 이 문서는 Codex의 작업 기준이자 Claude Code의 리뷰 기준이며, Claude Code는 프론트 소스를 수정하지 않는다. API 계약은 `docs/06-api-spec.md`.
+
 ## 1. 네이밍
 
 - 컴포넌트 PascalCase / 함수·변수 camelCase / Custom Hook `use` 접두사 / 이벤트 핸들러 `handle` 접두사
@@ -24,7 +26,7 @@ paths:
 - **Tailwind CSS**가 기본 스타일링 도구다 (확정, DEC-020). 유틸리티 클래스가 기본이고, 직접 작성하는 CSS 클래스는 kebab-case. 적용 버전의 공식 설치 문서(`docs/tech-stack.md`)를 따르고, Vite 8과의 호환은 설치 단계에서 확인한다.
 - 스택: React, JavaScript, Vite, Tailwind CSS, React Router, Axios. 새 라이브러리는 승인 없이 추가하지 않는다.
 - 디자인 토큰(`design/tokens`)을 CSS 변수(Tailwind `@theme`)로 연결해서 쓴다. 색상 값을 임의로 쓰지 않는다.
-- 승인된 디자인 시안만 구현한다 (`design-gate.md`). 시안 파일 배치와 React 적용도 개발자가 직접 한다.
+- 승인된 디자인 시안만 구현한다 (`design-gate.md`). 시안 파일 배치는 개발자가, React 적용은 Codex가 한다.
 
 ## 4. 동작
 
