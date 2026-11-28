@@ -1,5 +1,5 @@
 // Maps locally observed Java records. Recheck fields when the backend contract changes.
-// ProductOptionResponse currently spells the JSON field sizeMn; keep mapping aligned if renamed.
+// ProductOptionResponse uses sizeMm (backend fix 9de3860).
 function invalid() {
   const error = new Error(
     '상품 응답 형식을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.',
@@ -57,7 +57,7 @@ export function mapProductDetail(value) {
     const dto = object(value);
     const option = {
       id: id(dto.id),
-      sizeMm: integer(dto.sizeMn, 150, 350),
+      sizeMm: integer(dto.sizeMm, 150, 350),
       stock: integer(dto.stock, 0, 2147483647),
     };
     if (sizes.has(option.sizeMm) || ids.has(option.id)) invalid();

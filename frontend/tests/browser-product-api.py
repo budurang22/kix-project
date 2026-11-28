@@ -19,7 +19,7 @@ with sync_playwright() as p:
             route.fulfill(json={'id':'101','role':'USER'});return
         if parsed.path.startswith('/api/products/'):
             product=next((row for row in records if str(row['id'])==parsed.path.rsplit('/',1)[-1]),None)
-            if product:route.fulfill(json={**product,'description':'서버 상품 설명','options':[{'id':101,'sizeMn':250,'stock':2}]})
+            if product:route.fulfill(json={**product,'description':'서버 상품 설명','options':[{'id':101,'sizeMm':250,'stock':2}]})
             else:route.fulfill(status=404,json={'detail':'상품을 찾을 수 없습니다.'})
             return
         assert parsed.path=='/api/products',parsed.path
