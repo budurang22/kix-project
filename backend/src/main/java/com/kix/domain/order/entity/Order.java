@@ -3,6 +3,7 @@ package com.kix.domain.order.entity;
 import com.kix.domain.member.entity.Member;
 import com.kix.domain.product.entity.Product;
 import com.kix.domain.product.entity.ProductOption;
+import com.kix.domain.product.exception.ProductNotAvailableException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -58,6 +59,8 @@ public class Order {
         }
 
         Product product = productOption.getProduct();
+
+        if (!product.isOrderable()) throw new ProductNotAvailableException();
 
         Order order = new Order();
         order.member = member;

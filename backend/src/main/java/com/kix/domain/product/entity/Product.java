@@ -46,4 +46,8 @@ public class Product {
         this.status = ProductStatus.ON_SALE;
         this.deleted = false;
     }
+
+    public boolean isOrderable() {
+        return status == ProductStatus.ON_SALE && !deleted;
+    }
 }

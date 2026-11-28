@@ -4,8 +4,11 @@ import com.kix.domain.member.entity.Member;
 import com.kix.domain.product.entity.Brand;
 import com.kix.domain.product.entity.Product;
 import com.kix.domain.product.entity.ProductOption;
+import com.kix.domain.product.entity.ProductStatus;
+import com.kix.domain.product.exception.ProductNotAvailableException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -46,5 +49,33 @@ public class OrderTest {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> Order.create(member, option, -1, "key-0123456789abcdef"))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("판매 중지 상품은 주문 할 수 없다")
+    void stoppedProduct() {
+        // given
+        Product product = new Product(new Brand("Nike"), "덩크 로우", 139000, null, null);
+        ReflectionTestUtils.setField(product, "status", ProductStatus.STOPPED);
+        ProductOption option = new ProductOption(product, 270, 5);
+        Member member = new Member("buyer@kix.com", "hashed", "구매자");
+
+        // when & then
+        assertThatThrownBy(() -> Order.create(member, option, 1, "key-0123456789abcdef"))
+                .isInstanceOf(ProductNotAvailableException.class);
+    }
+
+    @Test
+    @DisplayName("삭제된 상품은 주문할 수 없다")
+    void deletedProduct() {
+        // given
+        Product product = new Product(new Brand("Nike"), "덩크 로우", 139000, null, null);
+        ReflectionTestUtils.setField(product, "deleted", true);
+        ProductOption option = new ProductOption(product, 270, 5);
+        Member member = new Member("buyer@kix.com", "hashed", "구매자");
+
+        // when & then
+        assertThatThrownBy(() -> Order.create(member, option, 1, "key-0123456789abcdef"))
+                .isInstanceOf(ProductNotAvailableException.class);
     }
 }
