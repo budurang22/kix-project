@@ -1,5 +1,7 @@
 # KIX 프론트엔드
 
+현재 상품 옵션 응답의 사이즈 필드는 `sizeMm`입니다(백엔드 `9de3860` 반영). 아래 이전 Phase 기록의 `sizeMn`은 당시 계약을 기록한 이력입니다.
+
 ## 1. 실행
 
 frontend 폴더에서 `npm ci`, `npm run dev`를 실행합니다. Node 24.21.0 / npm 11.19.0에서 검증했습니다.
@@ -121,3 +123,16 @@ frontend 폴더에서 `npm ci`, `npm run dev`를 실행합니다. Node 24.21.0 /
 10. **권장 커밋**: fix(frontend): 인증 요청 생명주기와 탐색 오류 복구 보완.
 
 `tests/browser-auth-navigation.py`는 기본 Mock 서버 http://127.0.0.1:5180에서 실행합니다. 기존 외부 Python Playwright/Chromium 환경을 사용하고 KIX_TEST_BASE_URL/KIX_TEST_ARTIFACTS로 변경할 수 있습니다. 화면 오류는 테스트 내부 모듈 응답에서만 주입하며 앱에 오류 유발 경로나 인증 우회 기능을 추가하지 않았습니다.
+
+## 10. 상품 옵션 계약 수정 — sizeMm (2026-11-28)
+
+1. **완료 기능**: 실제 상품 상세의 사이즈 응답을 백엔드 수정 후 필드 sizeMm으로 읽도록 수정했습니다.
+2. **변경 파일**: src/api/product-response.js, tests/product-response.test.js, tests/browser-product-api.py, 이 문서.
+3. **결정 근거**: 백엔드 커밋 9de3860에서 ProductOptionResponse의 sizeMn 오타가 sizeMm으로 수정되었습니다. 이전 필드의 자동 별칭은 두지 않고 현재 계약을 따릅니다. 이전 필드만 제공하는 응답은 오류로 처리합니다.
+4. **실행 명령**: git fetch origin, git worktree add -b feature/frontend-size-mm /private/tmp/kix-frontend-size-mm origin/develop, npm ci, npm run format, npm run lint, npm test, npm run format:check, VITE_PRODUCT_DATA_SOURCE=api npm run build, API 모드 Vite 5181 실행, 외부 Python Playwright의 API fixture/실서버 스크립트, 로컬 curl GET을 실행했습니다.
+5. **검증 결과**: API 모드 빌드·ESLint·포맷 검사와 Node 테스트 20개 통과. sizeMm 응답의 정상 상세·사이즈 선택을 포함한 API fixture 브라우저 검사 통과. 이전 sizeMn 필드만 제공하는 잘못된 응답은 기존 부정 테스트로 거부를 확인했습니다. 실서버 스크립트는 프록시 HTTP 502로 실패했고 직접 8080 GET에서도 연결 거부(HTTP 000)를 확인하여 현재 실서버 재검증은 미완료입니다. 백엔드를 직접 실행하거나 DB를 변경하지 않았습니다. 기존 React Router use client 빌드 경고 1건 유지.
+6. **Mock 구분**: 기본 Mock의 옵션은 이미 sizeMm이므로 기존 샘플 데이터 변경은 없습니다. 브라우저 응답 fixture는 실제 서버 상품 데이터와 구분합니다.
+7. **백엔드 연동**: 실제 Controller·DTO는 읽기만 했습니다. 운영/로컬 DB 데이터 삽입이나 백엔드 테스트 수정은 하지 않았습니다.
+8. **확인 사항**: 새 백엔드와 프론트 변환기를 함께 사용해야 합니다. 실상품 정상 상세·이미지 검증에는 데이터가 필요합니다.
+9. **다음 작업**: 실제 데이터와 후속 API가 준비되면 통합 검증을 이어갑니다. 승인 디자인 리소스도 전달 대기입니다.
+10. **권장 커밋**: fix(frontend): 상품 옵션 sizeMm 응답 계약 반영.

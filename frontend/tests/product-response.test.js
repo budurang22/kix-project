@@ -42,11 +42,11 @@ test('summary maps without detail options and honors server soldOut/status', () 
     '9223372036854775807',
   );
 });
-test('observed sizeMn field maps explicitly; detail and page never invent fields', () => {
+test('sizeMm contract maps explicitly; detail and page never invent fields', () => {
   const product = mapProductDetail({
     ...summary,
     description: null,
-    options: [{ id: 21, sizeMn: 250, stock: 2 }],
+    options: [{ id: 21, sizeMm: 250, stock: 2 }],
   });
   assert.deepEqual(product.options, [{ id: '21', sizeMm: 250, stock: 2 }]);
   assert.equal(product.description, '');
@@ -87,11 +87,11 @@ test('invalid payloads fail visibly rather than silently becoming empty products
     });
   for (const options of [
     null,
-    [{ id: 1, sizeMm: 250, stock: 1 }],
-    [{ id: 1, sizeMn: 250, stock: -1 }],
+    [{ id: 1, sizeMn: 250, stock: 1 }],
+    [{ id: 1, sizeMm: 250, stock: -1 }],
     [
-      { id: 1, sizeMn: 250, stock: 1 },
-      { id: 2, sizeMn: 250, stock: 1 },
+      { id: 1, sizeMm: 250, stock: 1 },
+      { id: 2, sizeMm: 250, stock: 1 },
     ],
   ]) {
     assert.throws(() => mapProductDetail({ ...summary, options }), {
@@ -154,7 +154,7 @@ test('list reader sends only observed Controller params and does not fall back a
       calls.push({ url, params: config?.params });
       if (url === '/products/12')
         return {
-          data: { ...summary, options: [{ id: 21, sizeMn: 250, stock: 2 }] },
+          data: { ...summary, options: [{ id: 21, sizeMm: 250, stock: 2 }] },
         };
       return {
         data: {
