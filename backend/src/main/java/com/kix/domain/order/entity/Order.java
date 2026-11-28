@@ -52,6 +52,11 @@ public class Order {
     private String idempotencyKey;
 
     public static Order create(Member member, ProductOption productOption, int quantity, String idempotencyKey) {
+
+        if (quantity < 1) {
+            throw new IllegalArgumentException("수량은 1 이상이어야 합니다.");
+        }
+
         Product product = productOption.getProduct();
 
         Order order = new Order();

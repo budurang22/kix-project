@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 public class OrderTest {
 
@@ -30,5 +31,20 @@ public class OrderTest {
         assertThat(order.getUnitPrice()).isEqualTo(139000);
         assertThat(order.getTotalPrice()).isEqualTo(278000L);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDERED);
+    }
+
+    @Test
+    @DisplayName("수량이 1 미만이면 주문을 만들 수 없다")
+    void quantityLessThanOne() {
+        // given
+        Product product = new Product(new Brand("Nike"), "덩크 로우", 139000, null, null);
+        ProductOption option = new ProductOption(product, 270, 5);
+        Member member = new Member("buyer@kix.com", "hashed", "구매자");
+
+        // when & then
+        assertThatThrownBy(() -> Order.create(member, option, 0, "key-0123456789abcdef"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Order.create(member, option, -1, "key-0123456789abcdef"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
