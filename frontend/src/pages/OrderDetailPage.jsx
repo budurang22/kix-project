@@ -21,6 +21,12 @@ export default function OrderDetailPage() {
           </p>
           <p className="mb-3 break-all text-sm">샘플 번호: {order.id}</p>
           <OrderSummary order={order} />
+          <Link
+            to={`/products/${order.productId}#sample-reviews`}
+            className="mt-6 inline-block text-sm underline"
+          >
+            이 상품의 샘플 리뷰 작성·수정
+          </Link>
         </>
       ) : (
         <EmptyState>

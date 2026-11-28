@@ -10,6 +10,11 @@ export function createSampleOrderService({ latency = 200 } = {}) {
   const inventory = new Map();
   let sequence = 0;
   return {
+    hasPurchased(productId) {
+      return [...ordersByKey.values()].some(
+        (entry) => entry.result.order.productId === productId,
+      );
+    },
     async submit({ input, idempotencyKey }) {
       if (latency) await new Promise((resolve) => setTimeout(resolve, latency));
       const product = await getMockProduct(input.productId);

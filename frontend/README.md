@@ -59,3 +59,18 @@ frontend 폴더에서 `npm ci`, `npm run dev`를 실행합니다. Node 24.21.0 /
 10. **권장 커밋**: feat(frontend): 샘플 주문 흐름과 마이페이지 내역 구현.
 
 브라우저 재현: 기존 외부 Python Playwright/Chromium 환경에서 `tests/browser-orders.py`를 실행합니다. 기본 주소는 http://127.0.0.1:5175, `KIX_TEST_BASE_URL`로 변경할 수 있습니다. 캡처는 `KIX_TEST_ARTIFACTS` 또는 /private/tmp/kix-order-artifacts에 저장합니다. 인증 응답은 테스트 내부에서만 가로채며 실제 토큰·계정을 사용하지 않습니다.
+
+## 6. Phase 4 일부 — 샘플 좋아요·리뷰 (2026-11-28)
+
+1. **완료 기능**: 상품 목록/상세의 샘플 좋아요 등록·취소, 마이페이지 좋아요 목록, 샘플 주문 완료 상품의 리뷰 작성·수정·수정 취소, 평점/내용 검증, 마이페이지 리뷰 목록과 상품 이동. 모든 화면에 샘플·현재 세션·초기화 정책을 표시합니다.
+2. **변경 파일**: `src/api/mocks/engagement.js`, 샘플 주문 서비스의 구매 여부 조회, `src/features/engagement/`, 샘플 세션 Provider, ProductCard·상품 상세·마이페이지·주문 상세, `src/hooks/use-pending-action.js`, `src/utils/review-validation.js`, `tests/engagement.test.js`, `tests/browser-engagement.py`, 이 문서.
+3. **결정 근거**: 좋아요/리뷰 Controller·DTO가 아직 없고 상품 DTO도 개발 중입니다. 임의의 HTTP API 계약은 추가하지 않았습니다. Mock 서비스 응답 기준으로 상태를 갱신하고, 로그인 세션에 묶인 메모리 상태만 사용합니다. 좋아요는 희망 상태 지정으로 중복 등록을 막고 리뷰는 샘플 주문 기록을 확인해 상품당 1개로 제한합니다. 평점은 정수 1~5, 내용은 앞뒤 공백을 제외한 1~1000자입니다(설계 VARCHAR(1000) 참고). 실제 서버 검증을 대체하지 않습니다.
+4. **실행 명령**: git fetch origin, git worktree add -b feature/frontend-engagement /private/tmp/kix-frontend-engagement origin/develop, npm ci, npm run format/build/lint, npm test, npm run dev -- --host 127.0.0.1 --port 5176 --strictPort, 외부 Python Playwright 환경에서 tests/browser-engagement.py 및 기존 상품/주문 브라우저 검사. 새 의존성 없음.
+5. **검증 결과**: 빌드·ESLint 통과, Node 테스트 12개 통과. 좋아요 희망 상태 멱등 처리·샘플 반환값 복사 격리·세션 분리, 비구매 리뷰/중복 리뷰/없는 리뷰 수정 거부, 평점·내용 경계 검사 추가. Chromium에서 로그인 이동 시 필터 보존, 중복 좋아요/리뷰 제출, 화면 간 상태 동기화, 좋아요 취소, 주문 후 리뷰 작성, 공백 오류, 수정 취소/저장, HTML 형태 입력의 텍스트 표시, 390/320px 가로 넘침 없음, 로그아웃·다른 계정 초기화 확인. pageerror 0개. 기존 React Router use client 빌드 경고 1건 유지.
+6. **Mock 여부**: 주문·좋아요·리뷰는 세션별 가상 데이터입니다. 리뷰는 공개 리뷰가 아니며 다른 회원의 실제 리뷰/좋아요 수를 표시하지 않습니다. 브라우저 검사는 인증 응답만 테스트 내부에서 가로채고 실제 좋아요/리뷰/주문 서버 요청을 보내지 않았습니다. 앱에 Mock 인증을 추가하지 않았습니다.
+7. **백엔드 연동**: 실제 인증 호출 코드는 유지. 실제 좋아요·리뷰 연동/DB 저장/서버 인가 검증은 미실행입니다. 샘플의 구매 기록/세션 확인을 실제 접근 제어로 간주하지 않습니다. 실제 연동 시 확인된 Controller·DTO와 서버 권한을 따릅니다.
+8. **확인 필요**: 리뷰 삭제는 기능 명세의 CRUD·DELETE 경로와 design-revision-v1.2.md의 MVP 제외 문구가 상충하여 구현하지 않았습니다. 이번 범위는 사용자 요청의 작성·수정입니다. 실제 리뷰 DTO/공개 목록/페이지 응답과 좋아요 상태·목록 계약, 승인 디자인 전달 대기. 백엔드·공통 문서·원래 작업 디렉터리는 수정하지 않았습니다.
+9. **다음 작업**: 준비된 실제 상품 API 연결 우선. 관리자 상품·옵션 UI는 실제 API 준비 상태에 맞춰 구현. 실제 주문·좋아요·리뷰 연동과 Phase 4 전체 검증은 아직 미완료입니다.
+10. **권장 커밋**: feat(frontend): 샘플 좋아요와 구매 상품 리뷰 구현.
+
+브라우저 재현 스크립트 `tests/browser-engagement.py`의 기본 주소는 http://127.0.0.1:5176입니다. 외부 Python Playwright/Chromium 환경이 필요하며 `KIX_TEST_BASE_URL`, `KIX_TEST_ARTIFACTS`로 변경할 수 있습니다. 테스트 토큰·계정은 가상이며 실제 서버에 전달하지 않습니다. 캡처는 기본 /private/tmp/kix-engagement-artifacts에 생성합니다.

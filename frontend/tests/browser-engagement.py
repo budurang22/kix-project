@@ -1,0 +1,102 @@
+"""UI sample test with intercepted authentication; no live backend requests."""
+import os
+import re
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+base = os.environ.get('KIX_TEST_BASE_URL', 'http://127.0.0.1:5176')
+artifacts = Path(os.environ.get('KIX_TEST_ARTIFACTS', '/private/tmp/kix-engagement-artifacts'))
+artifacts.mkdir(parents=True, exist_ok=True)
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page(viewport={'width':1280,'height':900})
+    errors=[]
+    api_requests=[]
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    def mock_api(route):
+        url=route.request.url
+        api_requests.append(url)
+        if url.endswith('/auth/login'):
+            route.fulfill(json={'accessToken':'ui-test-'+route.request.post_data_json['email'],'tokenType':'Bearer','expiresIn':3600})
+        elif url.endswith('/members/me'):
+            route.fulfill(json={'id':'202' if 'other' in route.request.headers.get('authorization','') else '101','role':'USER'})
+        else: route.abort()
+    page.route(base+'/api/**',mock_api)
+    def login(email='ui@example.com'):
+        page.get_by_label('이메일',exact=True).fill(email)
+        page.get_by_label('비밀번호',exact=True).fill('ui-test-password')
+        page.get_by_role('button',name='로그인',exact=True).click()
+    page.goto(base+'/products?brand=KIX+SAMPLE');page.wait_for_load_state('networkidle')
+    page.get_by_role('button',name='샘플 좋아요: 로우 스니커즈 샘플',exact=True).click()
+    expect(page).to_have_url(re.compile('/login$'))
+    login()
+    expect(page).to_have_url(re.compile('brand=KIX'))
+    like=page.get_by_role('button',name='샘플 좋아요: 로우 스니커즈 샘플',exact=True)
+    like.evaluate('(button) => { button.click(); button.click(); }')
+    expect(page.get_by_role('button',name='샘플 좋아요 취소: 로우 스니커즈 샘플',exact=True)).to_have_attribute('aria-pressed','true')
+    page.locator('article a').first.click()
+    expect(page.get_by_role('button',name='샘플 좋아요 취소: 로우 스니커즈 샘플',exact=True)).to_have_attribute('aria-pressed','true')
+    expect(page.get_by_text('현재 세션에서 이 상품의 샘플 주문을 먼저 완료해 주세요.',exact=True)).to_be_visible()
+    expect(page.get_by_label('리뷰 내용',exact=True)).to_have_count(0)
+    page.get_by_role('link',name='마이페이지',exact=True).click()
+    expect(page.locator('main article')).to_have_count(1)
+    page.get_by_role('button',name='샘플 좋아요 취소: 로우 스니커즈 샘플',exact=True).click()
+    expect(page.get_by_text('샘플 좋아요 상품이 없습니다.',exact=True)).to_be_visible()
+    page.get_by_role('link',name='상품 탐색',exact=True).last.click()
+    page.locator('article a').first.click()
+    page.get_by_role('button',name='샘플 좋아요: 로우 스니커즈 샘플',exact=True).click()
+    expect(page.get_by_role('button',name='샘플 좋아요 취소: 로우 스니커즈 샘플',exact=True)).to_have_attribute('aria-pressed','true')
+    page.get_by_role('button',name='250 1개 남음').click()
+    page.get_by_role('button',name='샘플 주문 확인').click()
+    page.get_by_role('checkbox').check()
+    page.get_by_role('button',name='샘플 주문 체험',exact=True).click()
+    expect(page.get_by_role('heading',name='샘플 체험 완료')).to_be_visible()
+    page.get_by_role('link',name='이 상품의 샘플 리뷰 작성·수정',exact=True).click()
+    content=page.get_by_label('리뷰 내용',exact=True)
+    content.fill('   ')
+    page.get_by_role('button',name='샘플 리뷰 등록',exact=True).click()
+    expect(page.get_by_role('alert')).to_contain_text('1~1000자')
+    payload='<img src=x onerror="window.sampleXss=1"> 샘플 후기'
+    content.fill(payload)
+    page.get_by_label('평점',exact=True).select_option('3')
+    page.get_by_role('form',name='샘플 리뷰 작성 양식').evaluate('(form) => { form.requestSubmit(); form.requestSubmit(); }')
+    expect(page.locator('#sample-reviews article')).to_have_count(1)
+    expect(page.locator('#sample-reviews')).to_contain_text('평점 3 / 5')
+    expect(page.get_by_text(payload,exact=True)).to_be_visible()
+    assert page.locator('#sample-reviews img').count()==0
+    assert page.evaluate('window.sampleXss === undefined')
+    page.get_by_role('button',name='샘플 리뷰 수정',exact=True).click()
+    page.get_by_label('리뷰 내용',exact=True).fill('취소할 수정')
+    page.get_by_role('button',name='수정 취소',exact=True).click()
+    expect(page.get_by_text(payload,exact=True)).to_be_visible()
+    page.get_by_role('button',name='샘플 리뷰 수정',exact=True).click()
+    updated='수정한 샘플 리뷰 '+('길이테스트'*25)
+    page.get_by_label('리뷰 내용',exact=True).fill(updated)
+    page.get_by_label('평점',exact=True).select_option('4')
+    page.get_by_role('button',name='샘플 리뷰 수정 저장',exact=True).click()
+    expect(page.locator('#sample-reviews article')).to_have_count(1)
+    expect(page.locator('#sample-reviews')).to_contain_text('평점 4 / 5')
+    expect(page.get_by_text(updated,exact=True)).to_be_visible()
+    for width in [390,320]:
+        page.set_viewport_size({'width':width,'height':850})
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),width
+    page.screenshot(path=str(artifacts/'review-mobile.png'),full_page=True)
+    page.get_by_role('link',name='마이페이지',exact=True).click()
+    expect(page.locator('main article')).to_have_count(1)
+    expect(page.get_by_text(updated,exact=True)).to_be_visible()
+    expect(page.get_by_text('평점 4 / 5',exact=True)).to_be_visible()
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.screenshot(path=str(artifacts/'account-mobile.png'),full_page=True)
+    page.get_by_role('link',name='상품에서 리뷰 확인·수정',exact=True).click()
+    expect(page.get_by_text(updated,exact=True)).to_be_visible()
+    page.get_by_role('button',name='로그아웃',exact=True).click()
+    expect(page.get_by_text('로그인하고 샘플 주문을 완료하면 리뷰를 체험할 수 있습니다.',exact=True)).to_be_visible()
+    page.get_by_role('link',name='마이페이지',exact=True).click()
+    login('other@example.com')
+    expect(page.get_by_text('샘플 좋아요 상품이 없습니다.',exact=True)).to_be_visible()
+    expect(page.get_by_text('작성한 샘플 리뷰가 없습니다.',exact=True)).to_be_visible()
+    expect(page.get_by_text('체험한 샘플 주문이 없습니다.',exact=True)).to_be_visible()
+    assert page.evaluate('localStorage.length === 0 && sessionStorage.length === 0')
+    assert all('/auth/login' in url or '/members/me' in url for url in api_requests),api_requests
+    assert not errors,errors
+    print('PASS: login redirect/filter preservation, duplicate like click, list/detail/my sync, unlike, purchase-only review, blank validation, duplicate review submit, plain-text content, edit/cancel/update, mobile 390/320px, session isolation; no page errors or live engagement API')
+    browser.close()

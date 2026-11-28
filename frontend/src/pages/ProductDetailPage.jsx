@@ -5,6 +5,8 @@ import { getProduct } from '../api/products-api.js';
 import { useResource } from '../hooks/use-resource.js';
 import { Loading, ErrorState } from '../components/Feedback.jsx';
 import ProductImage from '../features/products/ProductImage.jsx';
+import LikeButton from '../features/engagement/LikeButton.jsx';
+import ProductReviews from '../features/engagement/ProductReviews.jsx';
 import ProductOptions from '../features/products/ProductOptions.jsx';
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -53,10 +55,9 @@ function ProductDetail({ id }) {
           <p className="mt-6 leading-relaxed text-secondary">
             {product.description}
           </p>
+          <LikeButton product={product} />
           <ProductOptions product={product} />
-          <p className="mt-8 border-t border-primary/15 pt-5 text-sm text-secondary">
-            좋아요와 상품 리뷰는 백엔드 API 준비 후 제공됩니다.
-          </p>
+          <ProductReviews product={product} />
         </section>
       </div>
     </>

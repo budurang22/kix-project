@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { useSampleCommerce } from '../../hooks/use-sample-commerce.js';
 import { isProductAvailable } from '../../utils/product-selection.js';
+import LikeButton from '../engagement/LikeButton.jsx';
 import ProductImage from './ProductImage.jsx';
 export default function ProductCard({ product: source }) {
   const { applyInventory } = useSampleCommerce();
@@ -23,6 +24,7 @@ export default function ProductCard({ product: source }) {
           {product.price.toLocaleString('ko-KR')}원
         </p>
       </Link>
+      <LikeButton product={product} />
     </article>
   );
 }
