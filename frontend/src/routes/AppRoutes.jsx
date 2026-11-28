@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router';
 import RootLayout from '../layouts/RootLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import ProductsPage from '../pages/ProductsPage.jsx';
+import ProductDetailPage from '../pages/ProductDetailPage.jsx';
 import AuthPage from '../pages/AuthPage.jsx';
 import AccountPage from '../pages/AccountPage.jsx';
 import PendingPage from '../pages/PendingPage.jsx';
@@ -12,10 +13,7 @@ export default function AppRoutes() {
       <Route element={<RootLayout />}>
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route
-          path="products/:id"
-          element={<PendingPage title="상품 상세 준비 중" />}
-        />
+        <Route path="products/:id" element={<ProductDetailPage />} />
         <Route path="login" element={<AuthPage key="login" />} />
         <Route path="signup" element={<AuthPage key="signup" isSignup />} />
         <Route element={<RequireAuth />}>
