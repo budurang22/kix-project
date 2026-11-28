@@ -74,3 +74,18 @@ frontend 폴더에서 `npm ci`, `npm run dev`를 실행합니다. Node 24.21.0 /
 10. **권장 커밋**: feat(frontend): 샘플 좋아요와 구매 상품 리뷰 구현.
 
 브라우저 재현 스크립트 `tests/browser-engagement.py`의 기본 주소는 http://127.0.0.1:5176입니다. 외부 Python Playwright/Chromium 환경이 필요하며 `KIX_TEST_BASE_URL`, `KIX_TEST_ARTIFACTS`로 변경할 수 있습니다. 테스트 토큰·계정은 가상이며 실제 서버에 전달하지 않습니다. 캡처는 기본 /private/tmp/kix-engagement-artifacts에 생성합니다.
+
+## 7. Phase 5 샘플 UI — 관리자 상품·옵션·재고 (2026-11-28)
+
+1. **완료 기능**: ADMIN 접근 제어, 관리자 샘플 상품 목록·검색·상태 필터·페이징, 등록·수정·논리 삭제와 확인창, 사이즈 옵션 추가·제거·재고 편집, 입력값 검증, 오류·빈 목록·삭제된 상품 안내. 실제 관리자 API 연동 완료는 아닙니다.
+2. **변경 파일**: `src/api/mocks/admin-products.js`, `src/features/admin/`, `src/hooks/use-sample-admin.js`, `src/layouts/AdminLayout.jsx`, 관리자 목록/편집 페이지, 라우팅, `src/utils/admin-product-validation.js`, 공통 Modal, `tests/admin-products.test.js`, `tests/browser-admin.py`, SSR 라우팅 검사, 이 문서.
+3. **기술 결정**: 관리자 Controller/DTO가 아직 없으므로 임의의 HTTP 계약을 만들지 않았습니다. 관리자 샘플 서비스는 공개 상품 샘플과 분리하며 관리자 라우트를 벗어나거나 새로고침·로그아웃하면 초기화됩니다. 실제 카탈로그를 변경했다고 표시하지 않습니다. 브랜드는 기존 샘플 2개만 선택하며 브랜드 CRUD/이미지 업로드는 추가하지 않았습니다. 삭제는 메모리 레코드의 deleted 표시이며 조회에서 제외합니다. 사이즈 150~350 정수·중복 금지, 가격 1~2147483647, 재고 0~2147483647, 상품명 1~255자 규칙을 DDL/설계에 맞춰 검증합니다. 샘플에는 최소 옵션 1개가 필요하며 실제 관리자 요청 DTO는 추후 확인합니다.
+4. **실행 명령**: git fetch origin, git worktree add -b feature/frontend-admin /private/tmp/kix-frontend-admin origin/develop, npm ci, npm run format, npm run format:check, npm run lint, npm test, npm run build, npm run dev -- --host 127.0.0.1 --port 5177 --strictPort, 외부 Python Playwright 환경에서 관리자·상품·좋아요/리뷰 브라우저 검사. 새 프로젝트 의존성 없음.
+5. **검증 결과**: 빌드·ESLint·포맷 검사 성공, Node 테스트 14개 통과. 관리자 생성/수정/재고·옵션 변경/논리 삭제/404, 입력 경계와 중복 사이즈, 공개 상품/다른 관리자 샘플과 격리 검증. Chromium에서 게스트 로그인 이동·USER 거부·ADMIN CRUD·옵션 추가/제거·재고·검색/필터/페이징·삭제 확인/Escape 취소·삭제 후 404·관리자 이탈 초기화 확인. 390/320px 입력·목록의 가로 넘침 없음. Modal을 화면 중앙·여백·최대 높이·내부 스크롤·보조 닫기 버튼으로 보완하고 재검증했습니다. 관리자 pageerror 0개. 기존 상품 및 주문 후 좋아요·리뷰 브라우저 회귀 검사도 통과. 기존 React Router use client 빌드 경고 1건 유지.
+6. **Mock 여부**: 관리자 변경은 별도 메모리에만 반영됩니다. 사용자 샘플·주문 재고나 DB를 변경하지 않습니다. UI에 관리자 체험·분리·초기화 정책을 명시했습니다. 테스트 인증만 브라우저에서 가로채며 앱에 Mock 인증이나 관리자 승격 기능을 추가하지 않았습니다.
+7. **백엔드 연동**: 실제 ADMIN 인증은 기존 me 응답의 role을 따릅니다. 프론트 접근 제어는 UX이며 서버 인가의 대체가 아닙니다. 실제 관리자 API 요청·DB 저장·서버 권한/재고 동시성 검증은 미실행입니다. 상품 조회 DTO·Service가 백엔드에서 개발 중이며 준비된 Controller 없이 연동 경로를 확정하지 않았습니다.
+8. **확인 필요**: 관리자 상품·옵션·재고 API 계약과 논리 삭제·옵션 삭제 정책, 브랜드 목록, 공개 조회 권한. 실제 운영에서는 관리자 변경이 공개 상품/주문 재고에 반영되어야 하며 현재 샘플의 분리는 UI 검증 목적입니다. 승인 시안·이미지·폰트 전달 대기. 백엔드와 공통 문서·원래 작업 디렉터리는 수정하지 않았습니다.
+9. **다음 작업**: 준비된 실제 상품 조회 API 연동 우선. 이후 주문·좋아요·리뷰·관리자 API 연결과 실제 인증/인가·주문/재고 오류 검증, 승인 디자인 적용. Phase 5는 샘플 UI만 완료했으며 실제 CRUD 통합은 미완료입니다.
+10. **권장 커밋**: feat(frontend): 관리자 샘플 상품 옵션 재고 관리 구현.
+
+`tests/browser-admin.py`는 외부 Python Playwright/Chromium 환경에서 실행합니다. 기본 주소 http://127.0.0.1:5177, 환경변수 KIX_TEST_BASE_URL/KIX_TEST_ARTIFACTS로 변경 가능. 캡처 기본 위치는 /private/tmp/kix-admin-artifacts입니다. 테스트 인증 응답만 사용하고 실제 관리자 서버 요청을 보내지 않습니다.
