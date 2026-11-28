@@ -25,7 +25,7 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(Long memberId, Long productOptionId, int quantity, String idempotencyKey) {
-        ProductOption option = productOptionRepository.findById(productOptionId).orElseThrow(ProductOptionNotFoundException::new);
+        ProductOption option = productOptionRepository.findByIdForUpdate(productOptionId).orElseThrow(ProductOptionNotFoundException::new);
 
         Member member =memberRepository.findById(memberId).orElseThrow();
 
