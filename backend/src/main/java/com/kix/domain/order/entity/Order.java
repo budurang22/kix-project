@@ -62,6 +62,9 @@ public class Order {
 
         if (!product.isOrderable()) throw new ProductNotAvailableException();
 
+        // NOTE: 옵션 재고도 함께 차감한다
+        productOption.decreaseStock(quantity);
+
         Order order = new Order();
         order.member = member;
         order.productOption = productOption;

@@ -5,6 +5,7 @@ import com.kix.domain.product.entity.Brand;
 import com.kix.domain.product.entity.Product;
 import com.kix.domain.product.entity.ProductOption;
 import com.kix.domain.product.entity.ProductStatus;
+import com.kix.domain.product.exception.InsufficientStockException;
 import com.kix.domain.product.exception.ProductNotAvailableException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -92,5 +93,34 @@ public class OrderTest {
 
         // then
         assertThat(order.getTotalPrice()).isEqualTo(4_000_000_000L);
+    }
+
+    @Test
+    @DisplayName("주문을 만들면 옵션 재고가 주문 수량만큼 줄어든다")
+    void decreaseStockOnCreate() {
+        // given
+        Product product = new Product(new Brand("Nike"), "덩크 로우", 139000, null, null);
+        ProductOption option = new ProductOption(product, 270, 5);
+        Member member = new Member("buyer@kix.com", "hashed", "구매자");
+
+        // when
+        Order.create(member, option, 2, "key-0123456789abcdef");
+
+        // then
+        assertThat(option.getStock()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("재고가 부족하면 주문을 만들 수 없고 재고는 그대로다")
+    void insufficientStock() {
+        // given
+        Product product = new Product(new Brand("Nike"), "덩크 로우", 139000, null, null);
+        ProductOption option = new ProductOption(product, 270, 1);
+        Member member = new Member("buyer@kix.com", "hashed", "구매자");
+
+        // when & then
+        assertThatThrownBy(() -> Order.create(member, option, 2, "key-0123456789abcdef"))
+                .isInstanceOf(InsufficientStockException.class);
+        assertThat(option.getStock()).isEqualTo(1);
     }
 }
