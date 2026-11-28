@@ -9,12 +9,14 @@ import {
   isProductAvailable,
 } from '../../utils/product-selection.js';
 export default function ProductOptions({ product }) {
+  const isSample = product.source !== 'api';
   const navigate = useNavigate();
   const location = useLocation();
   const { session } = useAuth();
   const { beginOrder } = useSampleCommerce();
   function handleSampleOrder() {
     if (
+      !isSample ||
       !selected ||
       !canSelectOption(product, selected) ||
       quantity > selected.stock
@@ -108,14 +110,15 @@ export default function ProductOptions({ product }) {
             선택: {selected.sizeMm} mm · {quantity}개
           </p>
           <p className="mt-3 font-bold">
-            샘플 예상 금액 {(product.price * quantity).toLocaleString('ko-KR')}
-            원
+            {isSample ? '샘플 예상 금액 ' : '예상 금액 '}
+            {(product.price * quantity).toLocaleString('ko-KR')}원
           </p>
         </div>
       )}
       <Button
         className="w-full"
         disabled={
+          !isSample ||
           !selected ||
           !canSelectOption(product, selected) ||
           quantity > selected.stock
@@ -123,14 +126,15 @@ export default function ProductOptions({ product }) {
         onClick={handleSampleOrder}
         aria-describedby="purchase-unavailable"
       >
-        샘플 주문 확인
+        {isSample ? '샘플 주문 확인' : '주문 준비 중'}
       </Button>
       <p
         id="purchase-unavailable"
         className="text-sm leading-relaxed text-secondary"
       >
-        샘플 주문 체험만 가능합니다. 실제 주문·결제·배송은 발생하지 않습니다.
-        로그인이 필요하며 샘플 내역은 새로고침 시 사라집니다.
+        {isSample
+          ? '샘플 주문 체험만 가능합니다. 실제 주문·결제·배송은 발생하지 않습니다. 로그인이 필요하며 샘플 내역은 새로고침 시 사라집니다.'
+          : '주문 기능은 준비 중입니다. 표시 금액은 선택한 상품의 예상 금액이며 실제 주문은 진행되지 않습니다.'}
       </p>
     </div>
   );

@@ -22,7 +22,9 @@ test('combined search/brand filtering, normalized pagination and isolated sample
     filtered.items.every((product) => product.brand === 'STUDIO SAMPLE'),
   );
   assert.equal((await listProducts({ query: '없는상품' })).total, 0);
-  all.items[0].options[0].stock = 999;
+  assert.equal(all.items[0].options, undefined);
+  const detail = await getProduct('sample-1');
+  detail.options[0].stock = 999;
   assert.notEqual((await getProduct('sample-1')).options[0].stock, 999);
   await assert.rejects(getProduct('unknown'), { status: 404 });
 });

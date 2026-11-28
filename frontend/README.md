@@ -89,3 +89,20 @@ frontend 폴더에서 `npm ci`, `npm run dev`를 실행합니다. Node 24.21.0 /
 10. **권장 커밋**: feat(frontend): 관리자 샘플 상품 옵션 재고 관리 구현.
 
 `tests/browser-admin.py`는 외부 Python Playwright/Chromium 환경에서 실행합니다. 기본 주소 http://127.0.0.1:5177, 환경변수 KIX_TEST_BASE_URL/KIX_TEST_ARTIFACTS로 변경 가능. 캡처 기본 위치는 /private/tmp/kix-admin-artifacts입니다. 테스트 인증 응답만 사용하고 실제 관리자 서버 요청을 보내지 않습니다.
+
+## 8. Phase 7 일부 — 상품 목록·상세 API 선택 연동 (2026-11-28)
+
+1. **완료 기능**: 현재 로컬 Controller·DTO에 맞춘 상품 목록/상세 읽기 모드, 페이지·상품 응답 변환/검증, 목록 요약과 상세 옵션 분리, 서버 soldOut/판매 상태 표시, 이미지 표시/실패 대체 UI. 실제 상품에서는 주문·좋아요·리뷰를 준비 상태로 두고 샘플 동작에 연결하지 않습니다.
+2. **변경 파일**: `.env.example`, `src/api/{products-api,product-reader,product-response}.js`, 상품 요약/이미지 URL/선택 유틸리티, ProductCard/Image/Options·홈 상품·목록/상세, 샘플 재고 Provider, 관련 단위 테스트와 이미지/API fixture/실서버 읽기 브라우저 검사, 이 문서.
+3. **결정 근거**: 작업 중 로컬 백엔드의 GET /api/products 및 GET /api/products/{id} Controller와 GET 공개 조회 정책을 확인했습니다. 목록 쿼리는 keyword, brandId, page, size이며 서버가 id 내림차순을 적용합니다. PageResponse의 content/page/size/totalElements/totalPages를 UI 모델로 변환합니다. 목록 응답에는 options가 없으므로 옵션 배열 없이 soldOut으로 카드를 렌더링합니다. 숫자 ID가 안전 정수 범위를 넘으면 거부하고, 문자열 ID는 정밀도를 보존합니다. 오류를 빈 목록이나 Mock으로 대체하지 않습니다.
+4. **실행 명령**: git fetch origin, git worktree add -b feature/frontend-product-contract /private/tmp/kix-frontend-product-contract origin/develop, npm ci, npm run format/lint/build/format:check, npm test, VITE_PRODUCT_DATA_SOURCE=api npm run build. Mock 5178 및 API 모드 5179 개발 서버, 외부 Python Playwright 검사, curl로 로컬 /api/products GET. Vite는 동일 프로젝트 중복 개발 프로세스를 제한하므로 모드 변경 시 기존 서버를 종료한 뒤 재실행했습니다.
+5. **검증 결과**: Node 테스트 20개, 린트·Mock/API 두 모드 빌드 성공. 응답 변환·잘못된 응답 거부·Controller 쿼리 전달·목록/상세 재고 표시 검사 추가. Chromium fixture로 검색/브랜드 ID 유지/페이징·Bearer·401·500 재시도·잘못된 응답·빈 목록·범위 초과 페이지·상세/404·실상품 샘플 버튼 비노출·320px을 확인했습니다. 이미지 검사는 테스트 내부의 로컬 SVG만 사용해 정상/404/지원하지 않는 URL 대체를 확인했습니다. 기본 Mock 상품·주문 브라우저 회귀 검사 통과. 기존 React Router use client 빌드 경고 1건 유지.
+6. **Mock/fixture/실서버 구분**: 기본 모드는 여전히 mock입니다. API fixture 검사는 실제 서버 검증이 아닙니다. 별도 `tests/browser-product-live.py`는 실제 로컬 서버 + Vite 프록시에서 목록 HTTP 200, totalElements=0, 렌더링 0개 및 /products/1 HTTP 404를 확인했습니다. GET만 실행했고 DB에 데이터를 추가하지 않았습니다. 실데이터가 있는 목록/정상 상세·실제 상품 이미지·브랜드 필터 결과는 미검증입니다.
+7. **실제 연동 설정**: `.env.example` 참고. 로컬 `.env`에 VITE_PRODUCT_DATA_SOURCE=api를 지정하거나 `VITE_PRODUCT_DATA_SOURCE=api npm run dev`로 실행합니다. API 기본 주소 /api, 개발 프록시 http://localhost:8080 유지. 빌드에도 같은 환경변수를 지정해야 하며 빌드 후 런타임 변수만 바꿔 모드가 전환되지는 않습니다. 실제 환경변수 파일·운영/배포 설정은 수정하지 않았습니다.
+8. **개발자 확인 사항**: 현재 ProductOptionResponse의 JSON 필드는 sizeMn이며 Entity/UI는 sizeMm입니다. 현재 변환기는 실제 sizeMn을 명시적으로 매핑합니다. 백엔드에서 sizeMm으로 정정한다면 변환기·fixture도 함께 갱신해야 합니다. 브랜드 목록 API가 없어 실제 모드의 브랜드 선택 UI는 준비 상태이며 URL brandId는 확인된 Controller에 전달할 수 있습니다. 실제 상품으로 샘플 주문/좋아요/리뷰 요청을 하지 않습니다. 로컬 Controller는 백엔드 개발 중 코드 기준이므로 배포·병합된 백엔드에서 계약을 다시 확인해야 합니다.
+9. **다음 작업**: 실제 상품 데이터가 준비되면 성공 상세·옵션·검색·브랜드·이미지 검증. 백엔드 계약 확정 후 세부 필드 정리, 실제 주문/좋아요/리뷰/관리자 연동. 승인 디자인 리소스 적용 대기. Phase 7 전체 완료는 아닙니다.
+10. **권장 커밋**: feat(frontend): 상품 조회 API 선택 연동과 응답 표시 처리.
+
+새 프로젝트 의존성은 없고 백엔드·공통 문서·기존 작업 공간은 수정하지 않았습니다. 이미지 URL은 루트 상대 경로 또는 자격 증명이 없는 HTTP(S)만 허용하고 로딩 실패 시 준비 중 UI로 대체합니다. 실제 앱에 임의 상품 이미지나 외부 이미지 호스트를 추가하지 않았습니다.
+
+검사 재현: 기본 Mock 모드에서 tests/browser-products.py, tests/browser-orders.py, tests/browser-product-images.py를 사용합니다(기본 이미지 검사 포트 5178). API 모드에서는 tests/browser-product-api.py(테스트 내부 응답 fixture)와 tests/browser-product-live.py(실행 중인 실제 백엔드 필요)를 사용합니다(기본 포트 5179). 외부 Python Playwright/Chromium 환경과 KIX_TEST_BASE_URL 설정은 앞 절과 같습니다. API fixture 검사와 실서버 검사를 혼동하지 마세요.

@@ -1,11 +1,18 @@
 export function isProductAvailable(product) {
+  if (product.status !== 'ON_SALE') return false;
+  if (typeof product.soldOut === 'boolean') return !product.soldOut;
   return (
-    product.status === 'ON_SALE' &&
+    Array.isArray(product.options) &&
     product.options.some((option) => option.stock > 0)
   );
 }
 export function canSelectOption(product, option) {
-  return product.status === 'ON_SALE' && !!option && option.stock > 0;
+  return (
+    product.status === 'ON_SALE' &&
+    product.soldOut !== true &&
+    !!option &&
+    option.stock > 0
+  );
 }
 export function parseProductPage(value) {
   const page = Number(value);

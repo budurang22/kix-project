@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { applySampleInventory } from '../../utils/product-summary.js';
 import { useAuth } from '../../hooks/use-auth.js';
 import { createSampleOrderService } from '../../api/mocks/orders.js';
 import { createSampleEngagementService } from '../../api/mocks/engagement.js';
@@ -59,7 +60,13 @@ function SampleCommerceProvider({ children }) {
       .then((result) => {
         setInventory((value) => ({
           ...value,
-          [result.optionId]: result.remainingStock,
+          [draft.product.id]: {
+            ...Object.fromEntries(
+              draft.product.options.map((option) => [option.id, option.stock]),
+            ),
+            ...value[draft.product.id],
+            [result.optionId]: result.remainingStock,
+          },
         }));
         setOrders((value) =>
           value.some((order) => order.id === result.order.id)
@@ -74,13 +81,7 @@ function SampleCommerceProvider({ children }) {
     return pending.current;
   }
   function applyInventory(product) {
-    return {
-      ...product,
-      options: product.options.map((option) => ({
-        ...option,
-        stock: inventory[option.id] ?? option.stock,
-      })),
-    };
+    return applySampleInventory(product, inventory[product.id]);
   }
   return (
     <SampleCommerceContext.Provider

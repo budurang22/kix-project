@@ -22,7 +22,11 @@ function ProductDetail({ id }) {
       <>
         <ErrorState
           message={error.message}
-          onRetry={error.status === 404 ? undefined : retry}
+          onRetry={
+            error.status === 404 || error.code === 'INVALID_PRODUCT_ID'
+              ? undefined
+              : retry
+          }
         />
         <Link to="/products" className="underline">
           상품 목록으로
@@ -40,10 +44,12 @@ function ProductDetail({ id }) {
         {product.brand}
       </nav>
       <p className="mb-5 text-sm text-secondary">
-        MOCK · 가격·재고는 샘플이며 구매할 수 없습니다.
+        {product.source === 'api'
+          ? '상품 정보 · 주문·좋아요·리뷰는 준비 중입니다.'
+          : 'MOCK · 가격·재고는 샘플이며 구매할 수 없습니다.'}
       </p>
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-        <ProductImage name={product.name} />
+        <ProductImage name={product.name} imageUrl={product.imageUrl} />
         <section>
           <p className="text-xs font-bold tracking-widest">{product.brand}</p>
           <h1 className="mt-4 text-3xl font-bold tracking-tight">
@@ -55,9 +61,15 @@ function ProductDetail({ id }) {
           <p className="mt-6 leading-relaxed text-secondary">
             {product.description}
           </p>
-          <LikeButton product={product} />
+          {product.source !== 'api' && <LikeButton product={product} />}
           <ProductOptions product={product} />
-          <ProductReviews product={product} />
+          {product.source === 'api' ? (
+            <p className="mt-10 border-t border-primary/15 pt-6 text-sm text-secondary">
+              상품 리뷰는 준비 중입니다.
+            </p>
+          ) : (
+            <ProductReviews product={product} />
+          )}
         </section>
       </div>
     </>
