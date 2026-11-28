@@ -7,8 +7,10 @@ export default function ProductReviews({ product }) {
   const { session } = useAuth();
   const section = useRef(null);
   useEffect(() => {
-    if (window.location.hash === '#sample-reviews')
+    if (window.location.hash === '#sample-reviews') {
+      section.current?.focus({ preventScroll: true });
       section.current?.scrollIntoView();
+    }
   }, [product.id]);
   const { orders, reviews, saveReview } = useSampleCommerce();
   const [isEditing, setIsEditing] = useState(false);
@@ -18,6 +20,7 @@ export default function ProductReviews({ product }) {
     <section
       ref={section}
       id="sample-reviews"
+      tabIndex={-1}
       className="mt-12 border-t border-primary/15 pt-8"
     >
       <h2 className="text-xl font-bold">내 샘플 리뷰</h2>

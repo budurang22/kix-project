@@ -18,16 +18,22 @@ export function AuthProvider({ children }) {
     );
     return () => clearTimeout(timer);
   }, [session]);
-  async function login(credentials) {
+  async function login(credentials, { signal, onAuthenticated } = {}) {
     const attempt = ++generation.current;
-    const data = await requestLogin(credentials);
-    const member = await getMember(data.accessToken);
-    if (generation.current !== attempt) return;
+    const data = await requestLogin(credentials, { signal });
+    const expiresAt = Date.now() + data.expiresIn * 1000;
+    if (signal?.aborted || generation.current !== attempt) return false;
+    const member = await getMember(data.accessToken, { signal });
+    if (signal?.aborted || generation.current !== attempt) return false;
+    if (expiresAt <= Date.now())
+      throw new Error('로그인 시간이 만료되었습니다. 다시 시도해 주세요.');
+    onAuthenticated?.();
     setSession({
       token: data.accessToken,
       member,
-      expiresAt: Date.now() + data.expiresIn * 1000,
+      expiresAt,
     });
+    return true;
   }
   function logout() {
     generation.current++;

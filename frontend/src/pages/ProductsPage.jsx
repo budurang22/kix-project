@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { useCallback, useEffect } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router';
 import {
   listProducts,
   productBrands,
@@ -12,6 +12,16 @@ import Pagination from '../components/Pagination.jsx';
 import ProductCard from '../features/products/ProductCard.jsx';
 export default function ProductsPage() {
   const [params] = useSearchParams();
+  const location = useLocation();
+  useEffect(() => {
+    const target = location.state?.focusTarget;
+    if (
+      ['product-search', 'product-brand', 'product-filter-submit'].includes(
+        target,
+      )
+    )
+      document.getElementById(target)?.focus({ preventScroll: true });
+  }, [location.key, location.state]);
   const query = params.get('q') || '';
   const brand =
     params.get(productDataSource === 'api' ? 'brandId' : 'brand') || '';
@@ -41,10 +51,12 @@ function ProductResults({ query, brand, page }) {
     event.preventDefault();
     const fields = new FormData(event.currentTarget);
     const brandKey = productDataSource === 'api' ? 'brandId' : 'brand';
-    setParams({
-      q: fields.get('q').trim(),
-      [brandKey]: fields.get(brandKey) || '',
-    });
+    setParams(
+      { q: fields.get('q').trim(), [brandKey]: fields.get(brandKey) || '' },
+      {
+        state: { focusTarget: document.activeElement?.id || 'product-search' },
+      },
+    );
   }
   return (
     <>
@@ -68,6 +80,7 @@ function ProductResults({ query, brand, page }) {
         <label className="min-w-40 flex-1 text-sm">
           상품명 검색
           <input
+            id="product-search"
             name="q"
             defaultValue={query}
             maxLength={100}
@@ -88,6 +101,7 @@ function ProductResults({ query, brand, page }) {
           <label className="text-sm">
             브랜드
             <select
+              id="product-brand"
               aria-label="브랜드"
               name="brand"
               defaultValue={brand}
@@ -104,7 +118,11 @@ function ProductResults({ query, brand, page }) {
             </select>
           </label>
         )}
-        <button className="min-h-12 bg-accent px-6 font-bold" type="submit">
+        <button
+          id="product-filter-submit"
+          className="min-h-12 bg-accent px-6 font-bold"
+          type="submit"
+        >
           검색 적용
         </button>
         <Link to="/products" className="px-3 py-3 text-sm underline">
