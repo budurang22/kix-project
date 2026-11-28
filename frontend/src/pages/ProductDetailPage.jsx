@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useSampleCommerce } from '../hooks/use-sample-commerce.js';
 import { Link, useParams } from 'react-router';
 import { getProduct } from '../api/products-api.js';
 import { useResource } from '../hooks/use-resource.js';
@@ -11,7 +12,9 @@ export default function ProductDetailPage() {
 }
 function ProductDetail({ id }) {
   const load = useCallback(() => getProduct(id), [id]);
-  const { data: product, error, retry } = useResource(load);
+  const { data, error, retry } = useResource(load);
+  const { applyInventory } = useSampleCommerce();
+  const product = data ? applyInventory(data) : null;
   if (error)
     return (
       <>

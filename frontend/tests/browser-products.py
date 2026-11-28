@@ -35,7 +35,7 @@ with sync_playwright() as p:
     expect(page.get_by_label('선택 수량')).to_have_text('3')
     page.get_by_role('button',name='250 1개 남음').click()
     expect(page.get_by_label('선택 수량')).to_have_text('1')
-    expect(page.get_by_role('button',name='구매 준비 중')).to_be_disabled()
+    expect(page.get_by_role('button',name='샘플 주문 확인')).to_be_enabled()
     page.screenshot(path=str(artifacts/'detail-desktop.png'),full_page=True)
     for width,cols in [(1440,4),(800,3),(390,2),(320,2)]:
         page.set_viewport_size({'width':width,'height':850})
