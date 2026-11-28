@@ -9,9 +9,9 @@ export default function ProductCard({ product: source }) {
   const isAvailable = isProductAvailable(product);
   return (
     <article className="min-w-0">
-      <Link to={`/products/${product.id}`} className="group block">
+      <CardContent product={product}>
         <div className="relative">
-          <ProductImage name={product.name} />
+          <ProductImage name={product.name} imageUrl={product.imageUrl} />
           {!isAvailable && (
             <span className="absolute bottom-3 left-3 bg-primary px-3 py-1 text-xs text-background">
               {product.status === 'STOPPED' ? '판매 중지' : '품절'}
@@ -23,8 +23,16 @@ export default function ProductCard({ product: source }) {
         <p className="mt-3 font-bold">
           {product.price.toLocaleString('ko-KR')}원
         </p>
-      </Link>
-      <LikeButton product={product} />
+      </CardContent>
+      {product.source !== 'api' && <LikeButton product={product} />}
     </article>
+  );
+}
+
+function CardContent({ product, children }) {
+  return (
+    <Link to={`/products/${product.id}`} className="group block">
+      {children}
+    </Link>
   );
 }
