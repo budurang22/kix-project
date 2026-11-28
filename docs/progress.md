@@ -29,7 +29,7 @@
 - 미해결: 자동 테스트와 수동 시험이 같은 DB를 써서 `test@kix.com` 잔여 데이터로 `MemberRepositoryTest`가 한 번 실패했다(DEC-029, 배포 전 정리). `@Transactional` 테스트는 롤백되지만 Postman 가입 데이터는 남으므로 시험 후 `DELETE ...; COMMIT;`(DBeaver Manual 커밋 주의).
 - 알려진 이력 흠: 커밋 `731b88a`의 메시지("Bearer 토큰 검증과 401/403")는 실제 내용(로그인·JWT 발급)과 다르다(병합된 이력이라 그대로 둠). Bearer 부분은 `6c6aac6`(PR #5).
 - 로컬 실행: 터미널은 루트에서 `set -a; source .env; set +a` 후 `./gradlew cleanTest test`. IntelliJ 앱 실행은 실행 설정의 Environment variables에 `MYSQL_USER`·`MYSQL_PASSWORD`·`MYSQL_DATABASE`·`JWT_SECRET`이 필요하다(값은 `.env`, 채팅에 붙이지 않는다).
-- 협의 대기(주문 직전): 주문 처리 순서 수정안 `design-revision-v1.2.md` 5.2.1, 재전송 응답 코드(200/201), 타인 주문 404, 4.2 테스트 문서 읽기(`@AutoConfigureMockMvc`는 `org.springframework.boot.webmvc.test.autoconfigure` 패키지임을 4.2.0 JAR에서 확인함).
+- 주문 직전 협의: 처리 순서 수정안(`design-revision-v1.2.md` 5.2.1), 재전송 응답 코드(최초 201·재전송 200), 타인 주문 404는 **2026-11-28 사용자 승인으로 확정**했다(DEC-032). 남은 것은 4.2 테스트 문서 읽기뿐이다(`@AutoConfigureMockMvc`는 `org.springframework.boot.webmvc.test.autoconfigure` 패키지임을 4.2.0 JAR에서 확인함). 격리 수준 지정·락 타임아웃 동작은 구현 시 공식 문서로 확인한다(미확인).
 - 작업 방식 주의: 사용자는 터미널에 오류 로그를 붙여 넣으면 명령으로 실행되는 문제가 있었다("채팅에만 붙이기" 안내). 커밋·PR은 **한 번에 하나씩 결과를 확인**하며 진행한다(커밋 후 바로 PR로 가서 파일이 누락된 적 있음).
 
 ## 1. 현재 단계
@@ -51,9 +51,9 @@ AI 협업 환경과 공통 규칙 구성은 **마무리**했다. 신규 기술 �
 | 항목 | 필요한 시점 |
 | --- | --- |
 | ~~Boot 버전~~ | 해소: 4.2.0 확정 (DEC-025). 4.2 기준 요구사항·관리 의존성은 `references.md` 9장 |
-| 주문 처리 순서 수정안 (`design-revision-v1.2.md` 5.2.1) | 주문 구현·TDD 직전 |
+| ~~주문 처리 순서 수정안 (`design-revision-v1.2.md` 5.2.1)~~ | 해소: 확정 (DEC-032, 2026-11-28) |
 | 브랜드 테이블 분리, `size_mm` 범위, 상품명·사이즈 스냅샷, 상태 초기값 | DDL 작성 직전 |
-| 재전송 응답 코드(200/201), `ProblemDetail`·타인 주문 404 | API 구현 직전 |
+| ~~재전송 응답 코드(200/201), `ProblemDetail`·타인 주문 404~~ | 해소: 확정 (DEC-032, 2026-11-28) |
 | ~~개발 순서(DEC-005)~~ | 해소: 개발 먼저, 배포는 마지막 (2026-11-28) |
 | 4.2 테스트 문서 읽기 | 테스트 구현 직전 |
 | 배포: SSM 요건, GHCR 인증, 도메인·HTTPS, EC2 사양(실측 후) | 배포 단계 |
