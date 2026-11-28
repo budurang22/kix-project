@@ -106,3 +106,18 @@ frontend 폴더에서 `npm ci`, `npm run dev`를 실행합니다. Node 24.21.0 /
 새 프로젝트 의존성은 없고 백엔드·공통 문서·기존 작업 공간은 수정하지 않았습니다. 이미지 URL은 루트 상대 경로 또는 자격 증명이 없는 HTTP(S)만 허용하고 로딩 실패 시 준비 중 UI로 대체합니다. 실제 앱에 임의 상품 이미지나 외부 이미지 호스트를 추가하지 않았습니다.
 
 검사 재현: 기본 Mock 모드에서 tests/browser-products.py, tests/browser-orders.py, tests/browser-product-images.py를 사용합니다(기본 이미지 검사 포트 5178). API 모드에서는 tests/browser-product-api.py(테스트 내부 응답 fixture)와 tests/browser-product-live.py(실행 중인 실제 백엔드 필요)를 사용합니다(기본 포트 5179). 외부 Python Playwright/Chromium 환경과 KIX_TEST_BASE_URL 설정은 앞 절과 같습니다. API fixture 검사와 실서버 검사를 혼동하지 마세요.
+
+## 9. 인증·라우팅 품질 보완 (2026-11-28)
+
+1. **완료 기능**: 로그인/회원가입 화면 이탈 시 AbortController로 진행 요청 취소 및 늦은 UI 갱신 방지, 취소된 로그인 세션 저장 방지, 토큰 응답 수신 시점 기준 만료 계산, 화면 렌더링 오류 복구 UI, 경로별 페이지 제목·본문 포커스, 검색 제출 후 입력/버튼 포커스 복원, 리뷰 앵커 키보드 포커스.
+2. **변경 파일**: `src/api/auth-api.js`, `src/features/auth/AuthProvider.jsx`, `src/pages/AuthPage.jsx`, `src/pages/ProductsPage.jsx`, `src/components/ScreenErrorBoundary.jsx`, `src/routes/NavigationEffects.jsx`, `src/utils/page-title.js`, main/AppRoutes, 리뷰 앵커, `tests/browser-auth-navigation.py`, 이 문서.
+3. **결정 근거**: 브라우저 검사에서 검색 Enter 제출 후 keyed 결과 컴포넌트가 재생성되며 포커스를 잃는 문제를 확인했습니다. 결과 상태 초기화는 유지하며 History의 공개 focusTarget 메타데이터로 제출 요소에 포커스를 복원합니다. 경로 변경 시 본문, 같은 경로 검색 시 입력 요소를 대상으로 하고 POP 이동은 강제 상단 스크롤을 하지 않습니다. 로그인 성공은 샘플 경계 remount 전에 완료 요청의 취소 소유권을 해제해 정상 이동을 유지합니다. 서버 회원가입 요청의 클라이언트 취소가 서버 처리 롤백을 보장하는 것은 아닙니다.
+4. **실행 명령**: git fetch origin, git worktree add -b feature/frontend-quality /private/tmp/kix-frontend-quality origin/develop, npm ci, npm run format, npm run lint, npm test, npm run build, npm run format:check, npm run dev -- --host 127.0.0.1 --port 5180 --strictPort, 외부 Python Playwright 품질·기존 좋아요/리뷰·관리자 브라우저 검사. 새 의존성 없음.
+5. **검증 결과**: 빌드·ESLint·포맷 검사 성공, 기존 Node 테스트 20개 통과. Chromium 테스트 인증 응답으로 지연된 me 요청 취소/늦은 로그인·이동 방지, 중복 로그인 제출, 로그인 401, 가입 409/성공 안내, 1초 만료 응답, 정상 로그인/로그아웃, 메모리 저장 정책 확인. 제목·본문 포커스·검색 입력 포커스를 확인했습니다. 별도 테스트 페이지에서 렌더 오류를 의도적으로 주입해 스택/오류 문자열을 사용자에게 표시하지 않고 일반 안내·제목 포커스·홈 이동 복구·390px 가로 넘침 없음을 확인했습니다. 정상 흐름의 pageerror 0개. 기존 React Router use client 빌드 경고 1건 유지.
+6. **Mock 구분**: 이번 인증·가입 검사는 브라우저 내부에서만 응답을 가로챘습니다. 실제 회원을 만들거나 실서버 로그인·만료를 검증하지 않았습니다. 앱의 실제 인증 호출 코드는 유지했고 Mock 인증을 추가하지 않았습니다. 주문/리뷰/관리자 데이터는 기존 샘플입니다.
+7. **백엔드 상태**: 추가 주문·좋아요·리뷰·관리자 API와 실상품 데이터는 아직 준비 대기입니다. 기존 상품 API 선택 모드와 sizeMn 매핑은 유지합니다. 서버 인가·실제 주문 연동 완료로 기록하지 않습니다.
+8. **확인 사항**: 화면 오류로 하위 UI가 해제되면 샘플 메모리도 초기화될 수 있습니다. 다시 불러오기는 로그인 상태도 초기화한다는 안내를 표시합니다. 실제 서버 저장 데이터의 취소/롤백 기능을 추가한 것이 아닙니다. 백엔드·공통 문서·원래 작업 공간은 수정하지 않았습니다.
+9. **다음 작업**: 백엔드 API와 실상품 데이터 준비 후 실제 성공 상세·옵션·주문 등 통합 검증. 승인 디자인 리소스 전달 후 적용. 현재까지의 샘플/fixture 결과를 운영 통합 완료로 간주하지 않습니다.
+10. **권장 커밋**: fix(frontend): 인증 요청 생명주기와 탐색 오류 복구 보완.
+
+`tests/browser-auth-navigation.py`는 기본 Mock 서버 http://127.0.0.1:5180에서 실행합니다. 기존 외부 Python Playwright/Chromium 환경을 사용하고 KIX_TEST_BASE_URL/KIX_TEST_ARTIFACTS로 변경할 수 있습니다. 화면 오류는 테스트 내부 모듈 응답에서만 주입하며 앱에 오류 유발 경로나 인증 우회 기능을 추가하지 않았습니다.

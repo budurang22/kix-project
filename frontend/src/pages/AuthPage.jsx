@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { signup } from '../api/auth-api.js';
 import { useAuth } from '../hooks/use-auth.js';
@@ -9,24 +9,43 @@ export default function AuthPage({ isSignup = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const lock = useRef(false);
+  const request = useRef(null);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+      request.current?.abort();
+    };
+  }, []);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState('');
   async function handleSubmit(event) {
     event.preventDefault();
     if (lock.current) return;
     lock.current = true;
+    const controller = new AbortController();
+    request.current = controller;
     setIsPending(true);
     setError('');
     const data = Object.fromEntries(new FormData(event.currentTarget));
     try {
       if (isSignup) {
-        await signup(data);
+        await signup(data, { signal: controller.signal });
+        if (controller.signal.aborted) return;
         navigate('/login', {
           replace: true,
           state: { message: '회원가입이 완료되었습니다. 로그인해 주세요.' },
         });
       } else {
-        await login(data);
+        const hasLoggedIn = await login(data, {
+          signal: controller.signal,
+          onAuthenticated: () => {
+            // A successful session remounts this page through the sample boundary.
+            if (request.current === controller) request.current = null;
+          },
+        });
+        if (!hasLoggedIn || controller.signal.aborted) return;
         const from = location.state?.from;
         navigate(
           typeof from === 'string' &&
@@ -38,10 +57,12 @@ export default function AuthPage({ isSignup = false }) {
         );
       }
     } catch (failure) {
-      setError(failure.message);
+      if (active.current && !controller.signal.aborted)
+        setError(failure.message);
     } finally {
       lock.current = false;
-      setIsPending(false);
+      if (active.current && !controller.signal.aborted) setIsPending(false);
+      if (request.current === controller) request.current = null;
     }
   }
   return (

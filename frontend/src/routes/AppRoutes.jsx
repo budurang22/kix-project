@@ -1,3 +1,4 @@
+import NavigationEffects from './NavigationEffects.jsx';
 import { Route, Routes } from 'react-router';
 import SampleCommerceBoundary from '../features/orders/SampleCommerceProvider.jsx';
 import OrderConfirmPage from '../pages/OrderConfirmPage.jsx';
@@ -16,6 +17,7 @@ import RequireAuth from './RequireAuth.jsx';
 export default function AppRoutes() {
   return (
     <SampleCommerceBoundary>
+      <NavigationEffects />
       <Routes>
         <Route element={<RootLayout />}>
           <Route index element={<HomePage />} />
