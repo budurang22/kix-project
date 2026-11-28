@@ -69,7 +69,7 @@ public class Order {
         order.sizeMm = productOption.getSizeMm();
         order.quantity = quantity;
         order.unitPrice = product.getPrice();
-        order.totalPrice = product.getPrice() * quantity;
+        order.totalPrice = (long) product.getPrice() * quantity;
         order.status = OrderStatus.ORDERED;
         order.idempotencyKey = idempotencyKey;
         return order;

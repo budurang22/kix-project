@@ -78,4 +78,19 @@ public class OrderTest {
         assertThatThrownBy(() -> Order.create(member, option, 1, "key-0123456789abcdef"))
                 .isInstanceOf(ProductNotAvailableException.class);
     }
+
+    @Test
+    @DisplayName("총액이 int 범위를 넘어도 정확하게 계산한다")
+    void totalPriceOverInt() {
+        // given
+        Product product = new Product(new Brand("Nike"), "고가 상품", 2_000_000_000, null, null);
+        ProductOption option = new ProductOption(product, 270, 5);
+        Member member = new Member("buyer@kix.com", "hashed", "구매자");
+
+        // when
+        Order order = Order.create(member, option, 2, "key-0123456789abcdef");
+
+        // then
+        assertThat(order.getTotalPrice()).isEqualTo(4_000_000_000L);
+    }
 }
