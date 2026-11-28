@@ -3,6 +3,7 @@ package com.kix.domain.order.service;
 import com.kix.domain.member.entity.Member;
 import com.kix.domain.member.repository.MemberRepository;
 import com.kix.domain.order.entity.Order;
+import com.kix.domain.order.exception.IdempotencyKeyConflictException;
 import com.kix.domain.order.repository.OrderRepository;
 import com.kix.domain.product.entity.Brand;
 import com.kix.domain.product.entity.Product;
@@ -107,6 +108,47 @@ public class OrderServiceTest {
         assertThat(productOptionRepository.findById(option.getId()).orElseThrow().getStock())
                 .isEqualTo(3);
         assertThat(orderRepository.findAllByMemberId(member.getId())).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("같은 키로 수량이 다르면 키 충돌 예외가 발생하고 재고와 주문은 그대로다")
+    void sameKeyDifferentQuantity() {
+        // given
+        Member member = memberRepository.save(new Member("order-svc-4@kix.com", "hashed", "주문자"));
+        Brand brand = brandRepository.save(new Brand("TEST-ORDER-SVC-4"));
+        Product product = productRepository.save(new Product(brand, "덩크 로우", 139000, null, null));
+        ProductOption option = productOptionRepository.save(new ProductOption(product, 270, 5));
+        orderService.createOrder(member.getId(), option.getId(), 2, "key-0123456789abcdef");
+        entityManager.flush();
+        entityManager.clear();
+
+        // when & then
+        assertThatThrownBy(() -> orderService.createOrder(
+                member.getId(), option.getId(), 3, "key-0123456789abcdef"))
+                .isInstanceOf(IdempotencyKeyConflictException.class);
+        entityManager.clear();
+        assertThat(productOptionRepository.findById(option.getId()).orElseThrow().getStock())
+                .isEqualTo(3);
+        assertThat(orderRepository.findAllByMemberId(member.getId())).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("같은 키로 옵션이 다르면 키 충돌 예외가 발생한다")
+    void sameKeyDifferentOption() {
+        // given
+        Member member = memberRepository.save(new Member("order-svc-5@kix.com", "hashed", "주문자"));
+        Brand brand = brandRepository.save(new Brand("TEST-ORDER-SVC-5"));
+        Product product = productRepository.save(new Product(brand, "덩크 로우", 139000, null, null));
+        ProductOption option270 = productOptionRepository.save(new ProductOption(product, 270, 5));
+        ProductOption option280 = productOptionRepository.save(new ProductOption(product, 280, 5));
+        orderService.createOrder(member.getId(), option270.getId(), 2, "key-0123456789abcdef");
+        entityManager.flush();
+        entityManager.clear();
+
+        // when & then
+        assertThatThrownBy(() -> orderService.createOrder(
+                member.getId(), option280.getId(), 2, "key-0123456789abcdef"))
+                .isInstanceOf(IdempotencyKeyConflictException.class);
     }
 
 }

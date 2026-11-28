@@ -84,6 +84,10 @@ public class Order {
         return order;
     }
 
+    public boolean isSameRequest(Long productOptionId, int quantity) {
+        return this.productOption.getId().equals(productOptionId) && this.quantity == quantity;
+    }
+
     private static String generateOrderNumber() {
         String date = LocalDate.now(ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.BASIC_ISO_DATE);
         String random = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();

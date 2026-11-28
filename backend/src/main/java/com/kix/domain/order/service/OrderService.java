@@ -3,6 +3,7 @@ package com.kix.domain.order.service;
 import com.kix.domain.member.entity.Member;
 import com.kix.domain.member.repository.MemberRepository;
 import com.kix.domain.order.entity.Order;
+import com.kix.domain.order.exception.IdempotencyKeyConflictException;
 import com.kix.domain.order.repository.OrderRepository;
 import com.kix.domain.product.entity.ProductOption;
 import com.kix.domain.product.exception.ProductOptionNotFoundException;
@@ -34,6 +35,10 @@ public class OrderService {
         Optional<Order> existing = orderRepository.findByMemberIdAndIdempotencyKey(memberId, idempotencyKey);
 
         if (existing.isPresent()) {
+            Order order = existing.get();
+            if (!order.isSameRequest(productOptionId, quantity)) {
+                throw new IdempotencyKeyConflictException();
+            }
             return existing.get();
         }
 
