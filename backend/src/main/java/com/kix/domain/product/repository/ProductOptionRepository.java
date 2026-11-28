@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.List;
 
 public interface ProductOptionRepository extends JpaRepository<ProductOption, Long> {
-    List<ProductOption> findByProductId(Long productId);
 
     List<ProductOption> findByProductIdIn(Collection<Long> productIds);
+
+    List<ProductOption> findByProductIdOrderBySizeMmAsc(Long productId);
 }
