@@ -8,6 +8,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -31,4 +32,11 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleProductNotFound(ProductNotFoundException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "요청 파라미터 형식이 올바르지 않습니다.");
+    }
+
+
 }
