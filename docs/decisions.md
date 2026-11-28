@@ -398,3 +398,16 @@ Claude는 코드·설정·테스트 실행·Git·배포를 직접 하지 않는�
 - 가드 변경(`guard.py`): ① 같은 저장소의 다른 worktree에도 동일한 수정 제한 적용 ② `cd`, 상대·절대 경로, `..`, 심볼릭 링크, `bash -c`·`eval`·`env` 래퍼, `find -delete`, 리다이렉션을 실경로로 판정. 검증: `.claude/hooks/test_guard.py`.
 - 범위: 이 가드는 Claude Code의 PreToolUse hook일 뿐이며 Codex·IDE·터미널을 제한하지 않는다.
 - 한계: `python -c`·`node -e` 같은 인라인 코드와 스크립트 파일 내부 동작은 정규식 수준으로만 거른다. 가드는 보안 경계가 아니라 실수 방지용이다.
+
+## DEC-032. 주문 처리 순서·재전송 응답·타인 주문 정책 확정
+
+- 상태: 확정 (2026-11-28, 사용자 승인: "3개 다 제안대로"). 근거 문서: `design-revision-v1.2.md` 4.1장, 5.2.1장.
+- 결정 1, 처리 순서: **옵션 행 `PESSIMISTIC_WRITE` 락 → 같은 `member_id + Idempotency-Key` 주문 재확인(있으면 재고를 보지 않고 내용 비교) → 상품 상태·재고 확인 → 재고 차감·주문 저장** 순서로 처리한다. 주문 생성 트랜잭션은 **READ COMMITTED**로 실행한다. `UNIQUE(member_id, idempotency_key)`와 "트랜잭션 바깥에서 예외를 잡고 별도 트랜잭션으로 기존 주문 조회"는 최종 방어선으로 유지한다. 테스트 T-02b를 추가한다.
+- 결정 2, 재전송 응답: 최초 성공은 `201 Created`, 같은 키·같은 내용(`productOptionId`, `quantity`) 재전송은 `200 OK`와 기존 주문, 같은 키·다른 내용은 `409` `IDEMPOTENCY_KEY_CONFLICT`.
+- 결정 3, 타인 주문 조회: 존재 여부를 숨기기 위해 `403`이 아니라 `404`로 응답한다 (`security.md`와 같은 방향).
+- 이유: 기존 순서(재고 확인이 키 재확인보다 앞)에서는 재고 1개일 때 같은 키의 동시 요청 B가 A의 주문을 돌려받지 못하고 `OUT_OF_STOCK`으로 잘못 응답한다. READ COMMITTED는 락 대기 중 다른 트랜잭션이 커밋한 주문을 일반 SELECT로도 볼 수 있게 한다(REPEATABLE READ에서는 트랜잭션 첫 읽기 시점의 스냅샷만 보임).
+- 사실과 판단의 구분: REPEATABLE READ 스냅샷과 `FOR UPDATE` 최신 읽기는 MySQL 8.4 공식 문서 내용(`design-revision-v1.2.md` 5.2.1에 정리)이다. **이 프로젝트에서 실제로 실행해 확인한 적은 없다.** T-02b와 동시성 테스트로 실제 MySQL에서 검증한 뒤 결과를 `docs/learning/tdd.md`에 기록한다. 순서 수정안과 READ COMMITTED 채택은 자체 설계 판단이다.
+- 미채택: **키 선점**(트랜잭션 맨 앞에서 주문 행 INSERT). 중복 판단은 정확하지만 재고 부족 시 롤백과 대기·교착 동작을 더 학습해야 해서 마감(2026-11-30)을 고려해 제외했다.
+- 미확인: `FOR SHARE` 잠금이 없는 행의 삽입을 막는지(5.2.1에서 쓰지 않기로 함), 격리 수준 지정 방법(`@Transactional(isolation = ...)`)과 락 타임아웃 힌트의 MySQL 동작은 구현 시 공식 문서로 확인해 `references.md`에 기록한다.
+- 구현 구조: 컨트롤러 → (트랜잭션 없는) 주문 Facade → `@Transactional` 주문 서비스. Facade가 키 충돌 예외 처리와 재조회를 맡는다.
+- 영향: 요청 본문은 `productOptionId`, `quantity`다(`06-api-spec.md` 1장 초안의 `productId`는 구현 시 3장 계약으로 바로잡는다). 업무 오류 구분은 `ProblemDetail`의 `code` 속성을 쓴다(제안, 구현 시 확정).
