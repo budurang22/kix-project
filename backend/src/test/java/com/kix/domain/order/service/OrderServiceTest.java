@@ -7,6 +7,7 @@ import com.kix.domain.order.repository.OrderRepository;
 import com.kix.domain.product.entity.Brand;
 import com.kix.domain.product.entity.Product;
 import com.kix.domain.product.entity.ProductOption;
+import com.kix.domain.product.exception.ProductOptionNotFoundException;
 import com.kix.domain.product.repository.BrandRepository;
 import com.kix.domain.product.repository.ProductOptionRepository;
 import com.kix.domain.product.repository.ProductRepository;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -69,5 +71,17 @@ public class OrderServiceTest {
                 .isEqualTo(3);
         assertThat(orderRepository.findByMemberIdAndIdempotencyKey(
                 member.getId(), "key-0123456789abcdef")).isPresent();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 옵션이면 주문할 수 없다")
+    void optionNotFound() {
+        // given
+        Member member = memberRepository.save(new Member("order-svc-2@kix.com", "hashed", "주문자"));
+
+        // when & then
+        assertThatThrownBy(() -> orderService.createOrder(
+                member.getId(), Long.MAX_VALUE, 1, "key-0123456789abcdef"))
+                .isInstanceOf(ProductOptionNotFoundException.class);
     }
 }

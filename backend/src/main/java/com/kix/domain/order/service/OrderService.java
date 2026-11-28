@@ -5,6 +5,7 @@ import com.kix.domain.member.repository.MemberRepository;
 import com.kix.domain.order.entity.Order;
 import com.kix.domain.order.repository.OrderRepository;
 import com.kix.domain.product.entity.ProductOption;
+import com.kix.domain.product.exception.ProductOptionNotFoundException;
 import com.kix.domain.product.repository.ProductOptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(Long memberId, Long productOptionId, int quantity, String idempotencyKey) {
-        ProductOption option = productOptionRepository.findById(productOptionId).orElseThrow();
+        ProductOption option = productOptionRepository.findById(productOptionId).orElseThrow(ProductOptionNotFoundException::new);
 
         Member member =memberRepository.findById(memberId).orElseThrow();
 
