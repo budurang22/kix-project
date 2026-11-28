@@ -136,3 +136,24 @@ frontend 폴더에서 `npm ci`, `npm run dev`를 실행합니다. Node 24.21.0 /
 8. **확인 사항**: 새 백엔드와 프론트 변환기를 함께 사용해야 합니다. 실상품 정상 상세·이미지 검증에는 데이터가 필요합니다.
 9. **다음 작업**: 실제 데이터와 후속 API가 준비되면 통합 검증을 이어갑니다. 승인 디자인 리소스도 전달 대기입니다.
 10. **권장 커밋**: fix(frontend): 상품 옵션 sizeMm 응답 계약 반영.
+
+## 11. 실상품 읽기 검증 보완 (2026-11-28)
+
+1. **완료 작업**: tests/browser-product-live.py가 고정 /products/1 대신 실제 목록의 첫 상품 ID로 상세를 검사하도록 보완했습니다. 목록 이름/링크/상태, 상세 가격·브랜드·sizeMm/재고·품절 선택 제한·수량, 검색+brandId, 페이지 범위 복구, 없는 상품, 390/320px과 GET 전용 검사를 추가했습니다.
+2. **변경 파일**: tests/browser-product-live.py와 이 문서만 변경. 앱 동작·API 호출 구현·백엔드·DB·공통 문서 변경 없음.
+3. **결정 근거**: 목록에 상품이 있어도 ID 1이 없으면 정상 상세를 검증하지 못하던 검사 한계를 해결했습니다. 상품이 없으면 빈 화면까지만 확인하고 complete=false/종료 코드 2로 끝납니다. 실서버/fixture 결과를 별도 mode로 기록하고 실제 확인한 옵션·이미지 유무도 보고합니다.
+4. **실행 명령**: git fetch origin, git worktree add -b feature/frontend-live-verification /private/tmp/kix-frontend-live-verification origin/develop, npm ci, API 모드 Vite 5182 실행, 외부 Python Playwright의 --fixture-self-test 및 --fixture-self-test --fixture-empty 실행. 로컬 8080 curl GET에서는 연결 거부를 확인했습니다.
+5. **검증 결과**: 정상 contract fixture의 검사 경로와, 빈 fixture가 미완료로 끝나는 경로를 각각 검사했습니다. 이는 실서버 통합 성공이 아닙니다. 현재 백엔드 실행 주소 확인이 필요해 실제 데이터 검증은 대기 중입니다. 결과는 각각 KIX_TEST_ARTIFACTS/read-results.json에 저장하며 사용자 토큰·비밀번호는 기록하지 않습니다.
+6. **Mock 구분**: --fixture-self-test에서만 명세 3장의 형태를 따르는 가상 응답을 테스트 내부에서 가로챕니다. 이 모드는 mode=fixture-self-test로 출력하며 실제 서버 성공으로 표시하지 않습니다. --fixture-empty는 해당 모드에서만 허용하고 예상 종료 코드는 2입니다. 앱에 가상 서버나 DB seed를 추가하지 않았습니다.
+7. **실서버 상태**: 현재 http://127.0.0.1:8080에 연결되지 않습니다. 실행 중인 백엔드 주소 또는 개발자 세션에서의 실행이 필요합니다. 이 스크립트는 백엔드를 시작하거나 상품/회원/주문 데이터를 생성하지 않습니다.
+8. **확인 사항**: 실제 상품이 있어도 첫 상품의 선택 가능 옵션·재고 0 옵션·이미지 유무에 따라 검증 가능한 범위가 다릅니다. JSON의 detail_coverage로 이를 표시합니다. 승인 이미지가 없으면 실제 이미지 검증 완료로 간주하지 않습니다.
+9. **다음 작업**: 백엔드가 실행되면 fixture 옵션 없이 실제 목록/상세를 검사하고 미확인 상태를 업데이트합니다. 주문·좋아요·리뷰·관리자는 후속 API 준비 대기입니다.
+10. **권장 커밋**: test(frontend): 실상품 기반 읽기 검증과 결과 구분 보완.
+
+실제 검사 예시(backend 별도 실행 필요):
+
+```sh
+KIX_TEST_BASE_URL=http://127.0.0.1:5182 python tests/browser-product-live.py
+```
+
+외부 Python Playwright/Chromium 환경이 필요합니다. API 모드 프론트엔드가 실행 중이어야 하며 테스트는 GET만 수행합니다. 보고서 기본 경로는 /private/tmp/kix-product-live-artifacts/read-results.json이고 KIX_TEST_ARTIFACTS로 변경할 수 있습니다. 상품 없음/서버 미실행/검사 실패 시 종료 코드 2를 성공으로 기록하지 마세요.
