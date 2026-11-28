@@ -174,7 +174,25 @@
 ### 8.1 아직 확인하지 못한 것 (추가)
 
 - ~~start.spring.io에서 Boot 4.1.3(비-SNAPSHOT) 선택 가능 여부~~ → **해소 (2026-11-27)**: `https://start.spring.io/metadata/client` 원본 JSON을 직접 파싱해 확인. Boot `4.1.3.RELEASE`(기본값은 4.2.0), Java 17/21/25/27, 타입 `Gradle - Groovy`·`Gradle - Kotlin`, 의존성 ID `web`("Spring Web"), `security`, `data-jpa`, `mysql`("MySQL Driver"), `validation`("Validation"), `lombok`, `flyway`, `actuator`, `devtools`, `docker-compose`가 존재 (실행 확인). 화면의 UI 배치와 생성 결과물(build.gradle 내용)은 미확인
-- Boot 4.1 테스트 문서(`@DataJpaTest`, MockMvc 변경 세부), Hibernate 7·Security 7 변경점 세부
+- ~~Boot 4.1 테스트 문서~~ → 9.1장(4.2 기준)으로 이동. Hibernate 7·Security 7 변경점 세부
 - 관리 표의 요약 행 (위 표의 "요약"), mysql-connector-j 26.10.0 표기와 "MySQL 9.7.0"의 관계
 - `FOR SHARE`가 존재하지 않는 행에 거는 잠금의 영향 (공식 문서로 미확인)
 - JWT 라이브러리 선택지 (인증 단계에서 조사)
+
+## 9. Boot 4.2.0 기준 원문 검증 (2026-11-28)
+
+8장의 4.1.3 수치는 4.2.0 변경(DEC-025)으로 대체됐다. 이 장은 공식 문서 페이지를 `curl`로 직접 내려받아 파싱한 결과다 (`/4.2/…` 주소는 현재 문서 페이지로 리다이렉트된다). 검증 수준은 7장과 같다.
+
+| 주제 | 공식 URL | 확인 내용 | 메모 | 검증 |
+| --- | --- | --- | --- | --- |
+| 4.2.0 요구사항 | https://docs.spring.io/spring-boot/system-requirements.html | "Spring Boot 4.2.0 requires at least Java 17 and is compatible with versions up to and including Java 27. Spring Framework 7.1.0 or above is also required." Maven 3.6.3+, Gradle 8.x(8.14+)·9.x, Tomcat 11.0.x·Jetty 12.1.x(Servlet 6.1), GraalVM 25+ | 생성된 Gradle 9.9.2는 범위 안 | 원문 |
+| 4.2.0 관리 의존성 | https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html | 표 1883행 파싱: spring-security-core 7.2.0, hibernate-core 7.4.15.Final, spring-core 7.1.0, tools.jackson jackson-databind 3.1.8(com.fasterxml 2.21.8, annotations 2.21), mysql-connector-j 26.10.0, HikariCP 7.1.0, junit-jupiter 6.1.3, assertj-core 3.27.7, mockito-core 5.24.0, testcontainers·testcontainers-mysql 2.0.5, flyway-core·flyway-mysql 12.11.0, lombok 1.18.48, jakarta.persistence-api 3.2.0, hibernate-validator 9.1.6.Final | 페이지 머리말의 버전 번호는 파싱하지 못했다. 시스템 요구사항 페이지가 4.2.0을 표기한다 | 원문 |
+| 4.2 릴리스 노트 | https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.2-Release-Notes | Dependency Upgrades: Spring Framework 7.1.0, Spring Security 7.2.0, Spring Data 2026.1.0, Flyway 12.11.0, HikariCP 7.1.0, JUnit Jupiter 6.1.3. Spring Framework 7.1이 `RestTemplate`을 제거 예정으로 표시해 관련 Boot 지원이 deprecated(RestClient 권장). 4.0에서 deprecated였던 항목은 제거됨 | 릴리스 노트 전체(약 5.8만 자)를 읽은 건 아니고 Upgrading·Dependency Upgrades 절만 확인 | 원문(일부) |
+| 4.0 마이그레이션 가이드(테스트) | https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide | "@MockBean and @SpyBean support has been removed … in favor of @MockitoBean and @MockitoSpyBean." "Using the @SpringBootTest annotation will no longer provide any MockMVC support … add an @AutoConfigureMockMvc annotation to the test class." (8장의 요약을 원문으로 확인) | | 원문 |
+| 일관성 | (7장 Spring Security 7.2.0, JUnit 6.1.3, Mockito 5.24.0, Testcontainers 2.0.5 확인값) | 4.2.0 관리 버전이 앞서 읽은 Security reference(7.2.0), JUnit 문서(6.1.3), Mockito 릴리스(5.24.0), Testcontainers 사이트(2.0.5)와 같다 | 4.1.3은 Security 7.1.x, JUnit 6.0.3(요약), Mockito 5.23.0이라 어긋났다 | 원문 대조 |
+
+### 9.1 아직 확인하지 못한 것 (4.2 기준)
+
+- 4.2 테스트 문서(`@DataJpaTest`, MockMvc 설정 세부) — 테스트 구현 전에 읽는다.
+- 4.2의 JPA·Security 자동 구성 변경 세부, 4.2 릴리스 노트 전체
+- 공식 API의 4.2 최초 릴리스 날짜(2026-11-30)와 실제 배포 상태가 다르게 보이는 이유

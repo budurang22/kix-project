@@ -26,25 +26,25 @@
 | 기술 | 버전 | 사용 목적 | 선정 이유 | 공식 문서 | 적용 |
 | --- | --- | --- | --- | --- | --- |
 | Java | 21 LTS. 로컬 Homebrew OpenJDK 21.0.12.1 설치됨, 기본 JDK는 26(실측) | 언어 | 사용자 지정. Boot 3.5(Java 17~25)와 4.x(17~27) 모두 호환 (원문) | https://docs.spring.io/spring-boot/3.5/system-requirements.html | 확정 |
-| Spring Boot | **4.1.x 안정 버전** (문서·Initializr 표시 4.1.3). Java 17~27, Spring Framework 7.0.11+, Gradle 8.14+/9.x, Jakarta EE 11·Servlet 6.1, Tomcat 11 (원문). OSS 지원 2027-07-31까지 (공식 Spring API). 패치 버전은 Initializr에서 확인 후 확정 | 프레임워크 | 지원 중인 안정 버전 우선 (DEC-006, DEC-024). Boot 관리 의존성은 개별 버전을 지정하지 않는다. | https://docs.spring.io/spring-boot/4.1/system-requirements.html | 확정 (패치 버전 대기) |
+| Spring Boot | **4.2.0** (2026-11-28 사용자 결정으로 4.1.3에서 변경, DEC-025). Java 17~27, Spring Framework 7.1.0+, Gradle 8.14+/9.x, Jakarta EE 11·Servlet 6.1, Tomcat 11 (4.2 문서 원문). OSS 지원 2027-12-31까지 (공식 Spring API) | 프레임워크 | 지원 중인 안정 버전 우선 (DEC-006, DEC-024). Boot 관리 의존성은 개별 버전을 지정하지 않는다. | https://docs.spring.io/spring-boot/system-requirements.html | 확정 |
 | Spring MVC | Boot 관리 | REST API | 표준 웹 계층 | Boot 문서 | 확정 |
-| Spring Data JPA / Hibernate | Boot 4.1 릴리스 노트(원문): Hibernate 7.4. 관리 표의 정확한 값 7.4.15.Final은 요약. 스타터 `spring-boot-starter-data-jpa` (4.0 마이그레이션 가이드 원문) | ORM, 락(`PESSIMISTIC_WRITE`) | 사용자 지정 | https://docs.spring.io/spring-boot/4.1/appendix/dependency-versions/coordinates.html | 확정 |
-| Spring Security | Boot 4.1 릴리스 노트(원문): 7.1.0 (관리 표 7.1.3은 요약). 스타터 `spring-boot-starter-security`. 참고 문서(reference)는 7.2.0 기준이라 관리 버전과 약간 다를 수 있다 | 인증·인가 | 사용자 지정 | https://docs.spring.io/spring-security/reference/ | 확정 |
+| Spring Data JPA / Hibernate | Boot 4.2.0 관리 Hibernate 7.4.15.Final (관리 표 원문). 스타터 `spring-boot-starter-data-jpa` (4.0 마이그레이션 가이드 원문) | ORM, 락(`PESSIMISTIC_WRITE`) | 사용자 지정 | https://docs.spring.io/spring-boot/appendix/dependency-versions/coordinates.html | 확정 |
+| Spring Security | Boot 4.2.0 관리 7.2.0 (관리 표·릴리스 노트 원문). 스타터 `spring-boot-starter-security`. 읽은 reference 문서(CSRF·STATELESS·BCrypt·인가)도 7.2.0이라 관리 버전과 같다 | 인증·인가 | 사용자 지정 | https://docs.spring.io/spring-security/reference/ | 확정 |
 | JWT | 라이브러리 **미정** | 토큰 발급·검증 | 사용자 지정(기술명만 정해짐). 구현 방식(직접 필터 vs OAuth2 Resource Server)은 학습 단계에서 비교 | (미조회) | 후보 |
 | BCrypt | Spring Security `PasswordEncoder` | 비밀번호 해시 | 사용자 지정 | (미조회) | 확정 |
 | Bean Validation | Boot 관리 | 입력 검증 | 사용자 지정 | (미조회) | 확정 |
-| Gradle | Wrapper(Initializr가 생성). Boot 4.1.3: 8.14+ 또는 9.x (원문). 로컬에는 미설치 | 빌드 | 사용자 지정 | https://docs.spring.io/spring-boot/4.1/system-requirements.html | 확정 |
-| Springdoc OpenAPI | 호환표(원문): Boot 4.1.x ↔ springdoc **3.1.x~3.2.x** (3.2.1은 Boot 4.2.x 행). 산출물 `springdoc-openapi-starter-webmvc-ui`, 기본 경로 `/swagger-ui.html`, `/v3/api-docs` | API 문서화 | 사용자 지정 | https://springdoc.org/ | 확정 (정확한 버전은 의존성 추가 단계에서 확인) |
-| Lombok | Boot 4.1 관리 1.18.48 (요약) | 보일러플레이트 감소 | 선택 사항. 학습 목적상 처음에는 쓰지 않는 방안 권장 | https://projectlombok.org/ | **선택** |
+| Gradle | Wrapper(생성된 버전 9.9.2). Boot 4.2.0: 8.14+ 또는 9.x (원문). 로컬에는 별도 설치 없이 Wrapper 사용 | 빌드 | 사용자 지정 | https://docs.spring.io/spring-boot/system-requirements.html | 확정 |
+| Springdoc OpenAPI | 호환표(원문): Boot 4.2.x ↔ springdoc **3.2.1**. 산출물 `springdoc-openapi-starter-webmvc-ui`, 기본 경로 `/swagger-ui.html`, `/v3/api-docs` | API 문서화 | 사용자 지정 | https://springdoc.org/ | 확정 (정확한 버전은 의존성 추가 단계에서 확인) |
+| Lombok | Boot 4.2.0 관리 1.18.48 (관리 표 원문) | 보일러플레이트 감소 | 사용자 결정(2026-11-28)으로 도입 (DEC-026). 사용 규칙은 `backend.md` | https://projectlombok.org/setup/gradle | **확정** |
 
 ### 1.3 Database
 
 | 기술 | 버전 | 사용 목적 | 선정 이유 | 공식 문서 | 적용 |
 | --- | --- | --- | --- | --- | --- |
 | MySQL | 8.4 LTS 후보 (Docker 공식 이미지 태그 존재, 요약) | 데이터 저장 | 사용자 지정. CHECK는 `CONSTRAINT 이름 CHECK (...)` 문법, 이름 최대 64자 (원문) | https://dev.mysql.com/doc/refman/8.4/en/create-table-check-constraints.html | 확정 (정확한 태그는 컨테이너 구성 시) |
-| MySQL Connector/J | Boot 4.1.3 관리 26.10.0 (관리 표 원문). 같은 4.1 릴리스 노트는 "MySQL 9.7.0"으로 적어 표기가 다르다. 구성 단계에서 재확인 | JDBC 드라이버 | Boot 기본 | Boot 의존성 표 | 확정 |
-| HikariCP | Boot 4.1.3 관리 7.0.2 (원문). `maximumPoolSize` 기본 10 (README 원문, 7.x에서 달라졌는지는 미확인), `minimumIdle` 기본 maximumPoolSize, `connectionTimeout` 기본 30초 (원문) | 커넥션 풀 | Boot 기본, 동시성 테스트 해석에 필요 | https://github.com/brettwooldridge/HikariCP | 확정 |
-| Flyway | Boot 4.1 릴리스 노트(원문) Flyway 12.4.0. Boot 4.x는 `spring-boot-starter-flyway` 필요(4.0 마이그레이션 가이드 원문). 3.5 문서 기준 MySQL은 `flyway-mysql`, 기본 위치 `classpath:db/migration`. **MySQL 8.4 지원은 Flyway 지원 표에서 확인하지 못함(MySQL 목록에 8.4 표기 없음)** | 스키마 이력 관리 | 제약·인덱스 이름이 있는 DDL을 코드로 관리하고 테스트·CI·배포에서 같은 스키마를 쓰기 위해 | https://documentation.red-gate.com/fd/supported-databases-and-versions-143754067.html | **보류** (신규 기술 도입 중단, DDL 학습 단계에서 재검토) |
+| MySQL Connector/J | Boot 4.2.0 관리 26.10.0 (관리 표 원문). 4.1 릴리스 노트가 "MySQL 9.7.0"으로 적어 표기가 달랐던 점은 구성 단계에서 재확인 | JDBC 드라이버 | Boot 기본 | Boot 의존성 표 | 확정 |
+| HikariCP | Boot 4.2.0 관리 7.1.0 (관리 표·릴리스 노트 원문). `maximumPoolSize` 기본 10 (README 원문, 7.x에서 달라졌는지는 미확인), `minimumIdle` 기본 maximumPoolSize, `connectionTimeout` 기본 30초 (원문) | 커넥션 풀 | Boot 기본, 동시성 테스트 해석에 필요 | https://github.com/brettwooldridge/HikariCP | 확정 |
+| Flyway | Boot 4.2.0 관리 Flyway 12.11.0 (관리 표·릴리스 노트 원문). Boot 4.x는 `spring-boot-starter-flyway` 필요(4.0 마이그레이션 가이드 원문). 3.5 문서 기준 MySQL은 `flyway-mysql`, 기본 위치 `classpath:db/migration`. **MySQL 8.4 지원은 Flyway 지원 표에서 확인하지 못함(MySQL 목록에 8.4 표기 없음)** | 스키마 이력 관리 | 제약·인덱스 이름이 있는 DDL을 코드로 관리하고 테스트·CI·배포에서 같은 스키마를 쓰기 위해 | https://documentation.red-gate.com/fd/supported-databases-and-versions-143754067.html | **보류** (신규 기술 도입 중단, DDL 학습 단계에서 재검토) |
 
 ### 1.4 DevOps / Infrastructure
 
@@ -59,13 +59,13 @@
 
 | 기술 | 버전 | 사용 목적 | 선정 이유 | 공식 문서 | 적용 |
 | --- | --- | --- | --- | --- | --- |
-| JUnit Jupiter | Boot 4.1 관리 6.0.3 (요약). 공식 문서의 최신은 6.1.3(Java 17+). **Boot 관리 버전을 따른다** | 테스트 프레임워크 | `spring-boot-starter-test`에 포함 (원문) | https://docs.junit.org/current/user-guide/ | 확정 |
-| AssertJ | 3.27.7 (Boot 4.1도 동일, 요약). Java 8+ | 읽기 쉬운 단언, `assertThatThrownBy` | starter-test 포함 | https://assertj.github.io/doc/ | 확정 |
-| Mockito | 5.23.0 (Boot 4.1 릴리스 노트 원문). 사이트의 최신은 5.24.0 | 협력 객체 대역 | starter-test 포함 | https://site.mockito.org/ | 확정 (과도한 Mock 지양) |
-| MockMvc, `@WebMvcTest`, `@SpringBootTest`, `@DataJpaTest` | Boot 관리. Boot 4에서는 테스트 스타터가 기술별로 분리됨(`spring-boot-starter-webmvc-test` 등, 마이그레이션 가이드 원문). `@MockBean`→`@MockitoBean`, `@SpringBootTest`만으로는 MockMvc 미제공이라 `@AutoConfigureMockMvc` 필요(요약) | 웹 계층·통합·JPA 슬라이스 테스트 | 3.5 테스트 문서로 개념을 확인했다. **4.1 테스트 문서는 아직 읽지 않았다(미확인)** | https://docs.spring.io/spring-boot/3.5/reference/testing/spring-boot-applications.html | 확정 (4.1 문서 확인 후 구현) |
+| JUnit Jupiter | Boot 4.2.0 관리 6.1.3 (관리 표 원문, 공식 문서 최신 6.1.3과 같고 Java 17+ 필요). **Boot 관리 버전을 따른다** | 테스트 프레임워크 | `spring-boot-starter-test`에 포함 (원문) | https://docs.junit.org/current/user-guide/ | 확정 |
+| AssertJ | 3.27.7 (Boot 4.2.0 관리 표 원문). Java 8+ | 읽기 쉬운 단언, `assertThatThrownBy` | starter-test 포함 | https://assertj.github.io/doc/ | 확정 |
+| Mockito | 5.24.0 (Boot 4.2.0 관리 표 원문, 사이트의 최신과 같음) | 협력 객체 대역 | starter-test 포함 | https://site.mockito.org/ | 확정 (과도한 Mock 지양) |
+| MockMvc, `@WebMvcTest`, `@SpringBootTest`, `@DataJpaTest` | Boot 관리. Boot 4에서는 테스트 스타터가 기술별로 분리됨(`spring-boot-starter-webmvc-test` 등, 마이그레이션 가이드 원문). `@MockBean`/`@SpyBean` 제거 → `@MockitoBean`/`@MockitoSpyBean`, `@SpringBootTest`만으로는 MockMvc 미제공이라 `@AutoConfigureMockMvc` 필요 (4.0 마이그레이션 가이드 원문) | 웹 계층·통합·JPA 슬라이스 테스트 | 3.5 테스트 문서로 개념을 확인했다. **4.2 테스트 문서는 구현 전에 읽는다(미확인)** | https://docs.spring.io/spring-boot/3.5/reference/testing/spring-boot-applications.html | 확정 (4.2 문서 확인 후 구현) |
 | `ExecutorService`, `CountDownLatch` | Java 21 | 동시 요청 시뮬레이션 | 표준 라이브러리. Javadoc 예시가 "시작 신호 + 완료 신호" 패턴 (원문) | https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CountDownLatch.html | 확정 |
 | 실제 MySQL 통합 테스트 | MySQL 8.4 (Docker Compose) | 동시성·멱등성·제약·롤백 검증 | H2 같은 대체 DB는 락·제약 동작이 다르다 | - | 확정 |
-| Testcontainers | Boot 4.1 관리 2.0.5, 좌표 `testcontainers-mysql` (요약. Testcontainers 사이트 좌표와 일치). macOS는 Docker Desktop이 테스트 대상 환경 (원문) | 테스트용 MySQL 컨테이너 자동 기동 | Compose MySQL로 충분하면 불필요 | https://docs.spring.io/spring-boot/3.5/reference/testing/testcontainers.html | **선택** |
+| Testcontainers | Boot 4.2.0 관리 2.0.5, 좌표 `testcontainers-mysql` (관리 표 원문. Testcontainers 사이트 좌표와 일치). macOS는 Docker Desktop이 테스트 대상 환경 (원문) | 테스트용 MySQL 컨테이너 자동 기동 | Compose MySQL로 충분하면 불필요 | https://docs.spring.io/spring-boot/3.5/reference/testing/testcontainers.html | **선택** |
 | JaCoCo | 최신 릴리스 0.8.16 (2026/10/24), Java 21·25 공식 지원 (원문). Gradle 플러그인 기본 0.8.15, `jacocoTestReport`는 `test`에 자동으로 붙지 않음 (원문) | 커버리지 리포트 | 수치보다 규칙 검증이 우선이므로 보조 | https://docs.gradle.org/current/userguide/jacoco_plugin.html | **선택** |
 | Postman | (미조회) | API 수동 테스트 | 사용자 지정 | https://learning.postman.com/ | 확정 (공식 문서 미확인) |
 | Spotless + google-java-format | Spotless Gradle 플러그인 8.12.0 (2026-11-21), Gradle 7.3+/JRE 17+ 필요, `googleJavaFormat().aosp()`로 AOSP 선택. 플러그인 기본 google-java-format은 2.0.0(8.11.0 변경 내역), google-java-format 실행에는 JDK(Java 21, README의 "currently Java 21") 필요 (원문) | 포맷 검사·자동 적용 | 4칸 들여쓰기를 AOSP 스타일로 맞춤 | https://github.com/diffplug/spotless/blob/main/plugin-gradle/README.md | 확정 (`reorderImports` 기본값 등 세부는 미확인) |
@@ -78,7 +78,7 @@
 
 | 항목 | 상태 | 비고 |
 | --- | --- | --- |
-| Spring Boot 버전 | **확정: 4.1.x 안정 버전** (패치 버전은 Initializr 확인 후) | 3.5.x는 2026-06-30에 OSS 지원 종료(공식 Spring API, 원문). 근거는 DEC-006·DEC-024 |
+| Spring Boot 버전 | **확정: 4.2.0** (4.1.3에서 변경, DEC-025) | 3.5.x는 2026-06-30에 OSS 지원 종료(공식 Spring API, 원문). 근거는 DEC-006·DEC-024 |
 | Flyway 도입 | **보류** (신규 기술 도입 중단) | 필요성은 높다. 제약·인덱스 이름이 있는 DDL은 Hibernate 자동 생성으로 재현할 수 없고(설계), 테스트·CI·배포에서 같은 스키마가 필요하다. Boot 3.5는 `flyway-mysql` 모듈과 `db/migration` 위치를 사용한다 (원문). 단 Flyway 지원 표에 MySQL 8.4가 보이지 않으므로 8.4 컨테이너에서 실제 migrate가 되는지 시험한 뒤 확정한다. 대안: DDL SQL을 개발자가 직접 실행하고 `ddl-auto=validate` |
 | JWT 라이브러리 | 미정 | 학습 단계 3(인증)에서 비교 후 결정 |
 | React Router 메이저 | **확정: 7.x 우선** | 7.x 문서 확인 후 설치 |
@@ -268,13 +268,13 @@ GitHub Actions 러너는 개발자 IP가 아니므로, Actions가 EC2에 SSH로 
 - 동시성·멱등성·롤백·제약은 실제 MySQL 8.4(Docker Compose)에서 검증한다.
 - `@DataJpaTest`는 기본적으로 각 테스트를 트랜잭션으로 감싸고 끝나면 롤백한다. 임베디드 DB가 클래스패스에 있으면 그것을 구성하고, 실제 DB를 쓰려면 `@AutoConfigureTestDatabase(replace = Replace.NONE)`을 쓴다 (원문).
 - 동시성 테스트는 여러 스레드가 각자 커밋해야 하므로 테스트 메서드를 `@Transactional`로 감싸지 않는다. (설계. 이유: 테스트의 트랜잭션은 다른 스레드에 보이지 않는다.)
-- `@SpringBootTest`는 기본적으로 서버를 띄우지 않고 목(mock) 환경을 구성한다 (3.5 문서 원문). Boot 4.x에서는 테스트 스타터 분리, `@MockBean` 제거(`@MockitoBean`), MockMvc 사용 시 `@AutoConfigureMockMvc` 필요 등 변경이 있다 (4.0 마이그레이션 가이드, 일부는 요약). 테스트 구현 단계 전에 4.1 테스트 문서를 읽는다.
+- `@SpringBootTest`는 기본적으로 서버를 띄우지 않고 목(mock) 환경을 구성한다 (3.5 문서 원문). Boot 4.x에서는 테스트 스타터 분리, `@MockBean` 제거(`@MockitoBean`), MockMvc 사용 시 `@AutoConfigureMockMvc` 필요 등 변경이 있다 (4.0 마이그레이션 가이드, 일부는 요약). 테스트 구현 단계 전에 4.2 테스트 문서를 읽는다.
 
 ## 14. 남은 확인·협의 사항
 
-1. Boot 4.1.x 패치 버전: **4.1.3으로 확정** (Initializr 메타데이터 원본에서 확인, 화면 기본값 4.2.0을 4.1.3으로 변경)
+1. Boot 버전: **4.2.0 확정** (DEC-025, 4.1.3에서 변경)
 2. 구현 전 협의: 브랜드 테이블 분리, `size_mm` 범위, 상품명·사이즈 스냅샷, 오류 응답 형식, 재전송 상태 코드, 주문 처리 순서 (`design-revision-v1.2.md` 승인 현황·5.2.1)
 3. 배포 단계: SSM 요건, GHCR 인증, 도메인·HTTPS, EC2 사양(실측 후)
 4. Flyway는 DDL 학습 단계에서 재검토, JWT 라이브러리는 인증 단계에서 비교
 5. 기존 EC2 2개 구성 설명 요청 (11.2장 보정용)
-6. 4.1 테스트 문서 확인 (테스트 구현 전)
+6. 4.2 테스트 문서 확인 (테스트 구현 전)

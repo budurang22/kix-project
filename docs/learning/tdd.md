@@ -63,13 +63,25 @@ RED는 의도한 이유로 단언이 실패한 상태다. 컴파일 오류만 �
 - 재학습이 필요한 개념:
 ```
 
-(아직 기록 없음)
+### 3.1 옵션 재고 차감 (`ProductOption.decreaseStock`)
+- 개발 방식: **TDD**
+- 요구사항: ORD-03(재고 관리), 정책 "재고는 0 이상, 수량은 1 이상"
+- 비즈니스 규칙: 수량 1 미만 → `IllegalArgumentException` / 재고 < 수량 → `InsufficientStockException`(재고 변화 없음) / 그 외 재고 − 수량
+- 테스트 시나리오: 정상(10→3 차감→7), 경계값(5→5 차감→0), 재고 부족(2에서 3 차감, 재고 2 유지), 잘못된 수량(0, −1)
+- RED (2026-11-28, 개발자 실행): 테스트 파일 `ProductOptionTest`와 빈 `decreaseStock` 껍데기만 작성. `./gradlew test --tests '*ProductOptionTest'` → **5 tests completed, 5 failed**, 모두 `AssertionError`/`AssertionFailedError`(컴파일 오류 아님). 이유: 재고가 줄지 않음, 예외가 발생하지 않음
+- GREEN (2026-11-28, 개발자 실행): 최소 구현 후 `./gradlew test --tests '*ProductOptionTest'` → **5 tests 모두 통과**, BUILD SUCCESSFUL. 구현 순서: 수량 검사(`quantity < 1`) → 재고 검사(`stock < quantity`) → `stock -= quantity`. 재고 검사가 차감보다 먼저라서 "재고 부족 시 재고 그대로" 규칙이 지켜진다.
+- 실패 원인과 해결 (GREEN 도중 시행착오)
+  1. `IllegalArgumentException` 대신 `IllegalAccessException`을 사용 → 체크 예외라 "처리되지 않은 예외" 컴파일 오류. 이름이 비슷한 클래스를 자동완성에서 잘못 고름. `IllegalArgumentException`으로 수정
+  2. 조건을 `quantity > 1`로 반대로 작성 → 수량 2 이상에서 예외가 나고 0, −1은 통과. 테스트 5개가 모두 어긋남. `quantity < 1`로 수정. **테스트가 규칙 위반을 잡아낸 사례**
+  3. 테스트에서 `new ProductOption()`(인자 없는 `protected` 생성자) 사용 → 같은 패키지라 컴파일은 되지만 재고가 0인 객체가 만들어져 의도와 다르게 동작. `new ProductOption(270, 10)`으로 수정
+- REFACTOR: (미진행. 현재 메서드가 짧아 당장 개선할 것은 거의 없음)
+- 실제 실행 결과: 단위 테스트 5개 통과. 전체 테스트(DB 포함) 재실행 결과는 확인 대기
 
 ## 4. 요약표 (진행하면서 갱신)
 
 | 기능 | 개발 방식 | RED | GREEN | REFACTOR | 실제 실행 결과 |
 | --- | --- | --- | --- | --- | --- |
-| 옵션 재고 차감 | 미시작 | - | - | - | - |
+| 옵션 재고 차감 | TDD | 5개 실패 확인 (2026-11-28) | 5개 통과 (2026-11-28) | 미진행 | 단위 테스트 통과, 전체 재실행 대기 |
 | 재고 부족·수량 검증 | 미시작 | - | - | - | - |
 | 금액 계산·가격 스냅샷 | 미시작 | - | - | - | - |
 | 멱등성·중복 주문 방지 | 미시작 | - | - | - | - |

@@ -31,6 +31,11 @@ Claude는 Git 명령어와 실행 이유를 **설명**하고, 개발자가 직�
 
 > 전역 CLAUDE.md의 `<type>: <subject>` 형식보다 이 규칙(scope 포함)이 우선한다.
 
+## 2.1 Codex 프론트엔드 작업
+
+- Codex는 별도 worktree에서 `feature/frontend-*` 브랜치로 작업한다. worktree·브랜치 생성, 커밋, push, PR은 개발자가 한다. 백엔드 브랜치와 같은 작업 디렉터리를 공유하지 않는다.
+- 가드(`guard.py`)는 같은 저장소의 모든 worktree에서 Claude Code의 수정만 제한한다. 가드 변경은 worktree를 만들기 **전에** 커밋해야 각 worktree에 반영된다.
+
 ## 3. Pull Request
 
 `.github/PULL_REQUEST_TEMPLATE.md`는 Claude가 만들지 않는다. 작성 예시를 대화로 제공하고 개발자가 직접 만든다.

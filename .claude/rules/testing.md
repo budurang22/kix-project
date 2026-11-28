@@ -35,7 +35,7 @@
 
 JUnit Jupiter, AssertJ, Mockito, MockMvc, `@DataJpaTest`, `@SpringBootTest`, `ExecutorService`, `CountDownLatch`, 실제 MySQL. Testcontainers와 JaCoCo는 선택이다.
 버전은 Boot 관리 버전을 따르고 `docs/tech-stack.md`에 기록한다. 새 의존성은 승인 없이 추가하지 않는다.
-Boot 4.x는 테스트 스타터 분리, `@MockBean`→`@MockitoBean`, MockMvc에 `@AutoConfigureMockMvc` 필요 등 변경이 있다 (4.0 마이그레이션 가이드, 일부 요약). 테스트 구현 전에 4.1 테스트 문서를 읽고 `references.md`에 기록한다.
+Boot 4.x는 테스트 스타터 분리, `@MockBean`→`@MockitoBean`, MockMvc에 `@AutoConfigureMockMvc` 필요 등 변경이 있다 (4.0 마이그레이션 가이드, 일부 요약). 테스트 구현 전에 4.2 테스트 문서를 읽고 `references.md`에 기록한다.
 
 ## 4. 설계 원칙
 

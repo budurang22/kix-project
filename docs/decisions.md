@@ -37,15 +37,15 @@
 
 ## DEC-005. 개발 순서 조정
 
-- 상태: 제안
-- 결정(안): 핵심 가치인 주문·동시성·멱등성을 앞당긴다.
-  환경 → ERD/DDL 확정 → 인증 → 상품·옵션 → **주문** → 동시성 테스트 → 좋아요·리뷰 → 디자인 승인 → React → 배포 → 결과 기록
-- 이유: 가장 위험한 작업을 마감 직전(11/28)에 몰아두지 않기 위해.
-- 일정이 부족할 때: 선택 기능을 먼저 제외하고, 그다음 프론트 화면 수를 줄인다.
+- 상태: **확정 (2026-11-28, 사용자 결정): 개발을 먼저 하고 배포는 마지막 단계로 한다.**
+- 순서: 환경(JDK, 프로젝트, 로컬 MySQL Compose) → ERD/DDL → 인증 → 상품·옵션 → **주문** → 동시성 테스트 → 좋아요·리뷰 → 디자인 승인 → React → **(마지막) 배포** → 결과 기록
+- "배포"의 범위: 운영용 Dockerfile·Compose, Nginx, EC2, GitHub Actions, HTTPS. 개발용 로컬 MySQL(Compose)은 개발 환경이라 배포가 아니며 먼저 한다.
+- 이유: 핵심 가치인 주문·동시성·멱등성과 학습을 먼저 끝내고, 환경 작업이 개발 시간을 잠식하지 않게 한다 (CLAUDE.md의 일정 원칙).
+- 주의: 배포를 마지막에 두면 개발이 늘어질 때 배포 시간이 줄어든다. 일정이 부족하면 선택 기능을 먼저 제외하고, 배포는 DEC-021의 순서(수동 배포 → CI → CD → HTTPS)에서 뒤쪽 단계를 "미적용"으로 기록한다.
 
 ## DEC-006. Java / Spring Boot 버전
 
-- 상태: **확정 (2026-11-27): Java 21, Spring Boot 4.1.x 안정 버전** (DEC-024). 아래는 검토 기록이다.
+- 상태: **개정 (2026-11-28): Java 21, Spring Boot 4.2.0** (사용자 결정, DEC-025). 직전에는 4.1.x였다(DEC-024). 아래는 검토 기록이다.
 - 사용자 요청: Java 21 LTS + Spring Boot 3.5.x를 우선 후보로 검토
 - 확인한 사실
   - Boot 3.5.16 문서: Java 17~25 지원, Spring Framework 6.2.19+ 필요 (문서 확인)
@@ -95,7 +95,7 @@
 
 - Claude 추천(최종 결정은 사용자): 연속성과 마감을 우선하면 **A안(3.5.16)** 을 받아들일 수 있다. 단, "OSS 지원 종료 계열을 일부러 선택했다"는 점과 마감 후 4.x 업그레이드를 후속 학습 과제로 이 문서에 남기는 것을 조건으로 한다. 지원 기간을 우선한다면 B안이다.
 - 확정 전에 개발자가 할 일: start.spring.io 화면에서 Boot 버전 드롭다운에 3.5.x가 있는지 확인(읽기만)
-- 상태: 위 비교 후 **B안(4.1.x)으로 확정** (DEC-024)
+- 상태: 위 비교 후 B안(4.1.x)으로 확정(DEC-024)했다가 **4.2.0으로 변경** (DEC-025)
 
 ## DEC-007. 빌드 도구
 
@@ -291,12 +291,12 @@
 - 근거는 `docs/tech-stack.md`, `design-revision-v1.2.md`, `references.md` 7·8장에 있다.
 
 ### 1. 기술 스택과 버전
-- Java 21 LTS, **Spring Boot 4.1.x 안정 버전**(문서·Initializr 표시 4.1.3), Gradle Wrapper, Spring MVC, Spring Data JPA, Hibernate, Spring Security, JWT, MySQL 8.4 LTS, React, Vite, Tailwind CSS, **React Router 7.x 우선**, Axios, Docker, Compose, Nginx, AWS EC2, GitHub Actions
-- 선정 근거: 3.5.x는 OSS 지원이 2026-06-30에 종료되어(공식 Spring API) 지원 중인 4.1.x(OSS 2027-07-31)를 택했다. Java 21은 4.1.3의 지원 범위(17~27)에 들어간다 (원문).
+- Java 21 LTS, **Spring Boot 4.2.0**(2026-11-28 사용자 결정으로 4.1.3에서 변경, DEC-025), Gradle Wrapper, Spring MVC, Spring Data JPA, Hibernate, Spring Security, JWT, MySQL 8.4 LTS, React, Vite, Tailwind CSS, **React Router 7.x 우선**, Axios, Docker, Compose, Nginx, AWS EC2, GitHub Actions
+- 선정 근거(당시, 4.1.x 기준이며 DEC-025로 개정): 3.5.x는 OSS 지원이 2026-06-30에 종료되어(공식 Spring API) 지원 중인 4.1.x(OSS 2027-07-31)를 택했다. Java 21은 4.1.3의 지원 범위(17~27)에 들어간다 (원문).
 - Spring Boot가 관리하는 의존성은 특별한 이유 없이 개별 버전을 지정하지 않는다.
 - 4.x 전환의 영향(4.0 마이그레이션 가이드 원문 기준): 스타터 이름 변경(`spring-boot-starter-webmvc` 등), 테스트 스타터 분리, Jackson 3(`tools.jackson`), 모듈화, Jakarta EE 11. 학습 자료가 3.x 기준일 수 있다.
 - 패치 버전: Initializr 메타데이터 원본에서 `4.1.3.RELEASE` 선택 가능을 확인했다 (기본값은 4.2.0이므로 화면에서 4.1.3으로 바꾼다). → **4.1.3으로 확정**
-- Initializr 입력값(제안, 2026-11-27): Project `Gradle - Groovy`(학습 자료가 많은 쪽, 사용자 확인 대상), Language Java, Boot 4.1.3, Packaging Jar, Java 21, Group `com.kix`, Artifact `backend`, Name `kix`, Package name `com.kix`. 의존성: Spring Web, Spring Security, Spring Data JPA, Validation, MySQL Driver. 신규 기술 도입 중단 방침에 따라 Lombok·Flyway·Actuator·DevTools·Docker Compose Support는 넣지 않는다. springdoc은 Initializr에 없어 나중에 직접 추가한다.
+- Initializr 입력값(제안, 2026-11-27): Project `Gradle - Groovy`(학습 자료가 많은 쪽, 사용자 확인 대상), Language Java, Boot 4.1.3, Packaging Jar, Java 21, Group `com.kix`, Artifact `backend`, Name `kix`, Package name `com.kix`. → 실제로는 IntelliJ 마법사(File | New | Project | Spring Boot)로 생성했고, 이 마법사에서는 Name이 폴더 이름이라 `Name = backend`가 되어 메인 클래스는 `BackendApplication`이다(2026-11-28 확인). 생성 시 Boot 버전이 기본값 4.2.0으로 들어가 `build.gradle`에서 4.1.3으로 직접 고치도록 안내했다. → **개발자가 4.1.3으로 수정하고 빌드해 확인함 (2026-11-28)**: Gradle 9.9.2, Launcher JVM 21.0.12.1, `./gradlew build -x test` 성공, jar 매니페스트 `Spring-Boot-Version: 4.1.3`(4.1.3 빌드 검증). 이후 사용자가 4.2.0으로 되돌렸다(DEC-025). 설정 파일은 Initializr 기본값인 `application.properties`를 유지한다 (사용자가 명시적으로 답하지 않아 기본값 유지, 이견이 있으면 변경). 한 가지 형식만 쓴다(공식 문서: 둘이 같이 있으면 `.properties`가 우선하며 한 형식 사용을 권장). 의존성: Spring Web, Spring Security, Spring Data JPA, Validation, MySQL Driver. 신규 기술 도입 중단 방침에 따라 Lombok·Flyway·Actuator·DevTools·Docker Compose Support는 넣지 않는다. springdoc은 Initializr에 없어 나중에 직접 추가한다.
 
 ### 2. 백엔드 설계 원칙
 Spring MVC REST API, 도메인 중심 계층형 구조, Controller·Service·Repository·Entity·DTO 책임 분리, POJO 기반 객체지향(캡슐화·응집도·결합도·SOLID), 생성자 주입, 도메인 객체가 비즈니스 규칙을 관리, `@Transactional`, 과도한 추상화·디자인 패턴 지양. IoC·DI·AOP·PSA를 학습하고 `@Aspect`/`@Around` 실행 시간 측정은 일정에 따라 적용한다. `backend.md`에 누락된 POJO·AOP 지침만 추가했다.
@@ -323,3 +323,78 @@ Spring Security + JWT + BCrypt, Access Token 60분, Refresh Token 제외, `Autho
 
 ### 8. 학습 모드
 Claude는 코드·설정·테스트 실행·Git·배포를 직접 하지 않는다. 개념, 공식 문서 근거, 단계별 예시, 리뷰, 학습 기록을 맡는다.
+
+## DEC-025. Spring Boot 4.2.0으로 변경 (DEC-006·DEC-024 개정)
+
+- 상태: 확정 (2026-11-28, 사용자 결정). 직전까지는 4.1.3(DEC-024)이었고 4.1.3 빌드는 직접 검증했다(Gradle 9.9.2, JVM 21.0.12.1, `build -x test` 성공, 매니페스트 4.1.3).
+- 결정: Spring Boot **4.2.0**. IntelliJ 마법사의 기본값이었고 `build.gradle`(`id 'org.springframework.boot' version '4.2.0'`)에 이미 들어 있다. 첫 4.2.0 빌드도 성공했고 매니페스트가 `Spring-Boot-Version: 4.2.0`이었다.
+- 4.2.0 기준으로 원문에서 확인한 것 (2026-11-28, 공식 문서 페이지를 직접 내려받아 파싱)
+  - 요구사항: Java 17 이상·27까지, Spring Framework 7.1.0 이상, Gradle 8.x(8.14+)·9.x, Maven 3.6.3+, Tomcat 11.0.x·Jetty 12.1.x(Servlet 6.1). 생성된 Wrapper(Gradle 9.9.2)는 이 범위다. Java 21 호환
+  - 지원 기간(공식 Spring API): 4.2.x OSS 2027-12-31, 상용 2028-12-31 (최초 릴리스 표기는 2026-11-30이지만 문서와 Maven에는 4.2.0이 이미 있다. 날짜 표기 차이의 원인은 미확인)
+  - 관리 의존성(관리 표 원문, 1883행 중): Spring Security 7.2.0, Hibernate 7.4.15.Final, Spring Framework 7.1.0, Jackson 3 `tools.jackson` 3.1.8(Jackson 2 databind 2.21.8, annotations 2.21), mysql-connector-j 26.10.0, HikariCP 7.1.0, JUnit Jupiter 6.1.3, AssertJ 3.27.7, Mockito 5.24.0, Testcontainers 2.0.5(`testcontainers-mysql` 2.0.5), Flyway 12.11.0, Lombok 1.18.48, Jakarta Persistence 3.2.0, Hibernate Validator 9.1.6.Final
+  - 릴리스 노트(원문): Spring Framework 7.1, Spring Security 7.2.0, Spring Data 2026.1.0, Flyway 12.11.0, HikariCP 7.1.0, JUnit Jupiter 6.1.3. Spring Framework 7.1이 `RestTemplate`을 제거 예정으로 표시해 관련 자동 구성이 deprecated(RestClient 권장). KIX는 `RestTemplate`을 쓰지 않으므로 영향 없음. 4.0에서 deprecated였던 항목은 4.2에서 제거됨
+  - springdoc: 호환표(원문)에서 Boot 4.2.x ↔ springdoc 3.2.1
+  - 테스트(4.0 마이그레이션 가이드 원문): `@MockBean`/`@SpyBean` 제거 → `@MockitoBean`/`@MockitoSpyBean`, `@SpringBootTest`만으로는 MockMVC 미제공 → `@AutoConfigureMockMvc` 필요
+- 4.2.0을 택해서 좋아진 점: 앞서 읽은 Spring Security 7.2.0 문서(CSRF, STATELESS, BCrypt, 인가 설정)가 관리 버전과 **같은 버전**이다. JUnit 6.1.3, Mockito 5.24.0, Testcontainers 2.0.5도 공식 사이트·문서에서 읽은 최신 값과 같다. 4.1.3은 Security 7.1.x, JUnit 6.0.3(요약)이라 어긋남이 있었다.
+- 감수하는 것: 4.2.0은 공식 API의 최초 릴리스 날짜(2026-11-30)가 아직 오지 않았다. 직접 확인한 건 문서와 Maven에서 내려받아지는 것까지다. 학습 자료(3.x 기준)와의 거리는 4.1과 같다.
+- 관련 문서 반영: `tech-stack.md`, `references.md` 9장, `.claude/rules/backend.md`, `testing.md`, `progress.md`
+- 4.2 테스트 문서(`@DataJpaTest` 등)는 테스트 구현 전에 읽는다 (미확인).
+
+## DEC-026. Lombok 도입
+
+- 상태: 확정 (2026-11-28, 사용자 결정). 신규 기술 도입 중단 방침(DEC-024)의 예외로 사용자가 직접 승인했다.
+- 설정: `compileOnly`와 `annotationProcessor`에 `org.projectlombok:lombok`을 추가한다(Lombok Gradle 설치 문서 원문의 구성). 버전은 Boot 4.2.0이 관리하는 1.18.48(관리 표 원문)을 쓰고 직접 지정하지 않는다. 테스트 코드에서 Lombok을 쓸 때만 `testCompileOnly`·`testAnnotationProcessor`를 추가한다.
+- IntelliJ: 어노테이션 처리(Annotation Processing) 활성화가 필요하다 (확인 안 함, 알림이 뜨면 수락).
+- 사용 규칙: `.claude/rules/backend.md` (엔티티는 `@Getter`·`@NoArgsConstructor(PROTECTED)`만, `@Data`·`@Setter` 지양, DTO는 `record` 우선).
+- 근거: 반복 코드 감소, 실무 사용 빈도. 학습 목적상 처음에는 생략하자는 제안(이전 기록)은 사용자가 채택하지 않았다.
+
+## DEC-027. 로컬 MySQL은 호스트 포트 3306 사용
+
+- 상태: 확정 (2026-11-28, 사용자 결정)
+- 결정: Compose의 MySQL 컨테이너를 `127.0.0.1:3306`에 연결한다. 이 맥에서 이미 3306을 쓰던 Homebrew `mysql@8.4`는 중지한다(`brew services stop mysql@8.4`: 즉시 중지하고 로그인 시 자동 시작도 해제, 로컬 `brew services --help` 확인). 기존 데이터(`/opt/homebrew/var/mysql`)는 삭제되지 않는다.
+- 대안(채택 안 함): 컨테이너를 3307로 매핑해 기존 MySQL과 공존.
+- 주의: 기존 로컬 MySQL을 다시 써야 하면 `brew services start mysql@8.4`로 켜야 하며 KIX 컨테이너와 동시에 쓸 수 없다.
+
+## DB 설계 4항목 확정 (2026-11-28, 사용자 "추천대로")
+
+- 상태: 확정 (`design-revision-v1.2.md` 승인 현황의 ②③④와 상태 초기값)
+- 결정: ① 브랜드는 별도 `brands` 테이블로 분리 ② `size_mm`은 150~350 정수(5mm 단위 검증은 앱에서) ③ 주문에 `product_name`, `size_mm` 스냅샷 저장 ④ 주문 상태는 `ORDERED`로 시작(CHECK는 `ORDERED`/`CANCELED` 허용, 취소는 선택 기능)
+- DDL: `backend/src/main/resources/db/migration/V1__init.sql` (Flyway 보류라 자동 실행하지 않고 DBeaver로 직접 실행). 사용자가 시간 부족을 이유로 DDL 전문을 요청해 Claude가 대화로 전체 예시를 제공했고, 파일 작성·실행은 개발자가 한다.
+- FK 컬럼에는 별도 `idx_`를 만들지 않는다(InnoDB가 자동 생성한다는 일반 지식, 확인 안 함). 이전 문서의 `idx_products_brand_id`는 제외.
+
+## DEC-028. JWT는 oauth2-resource-server로 발급·검증
+
+- 상태: 확정 (2026-11-27, 사용자 "기본 회원가입 + oauth2 사용" 선택). 회원가입은 기존 이메일·비밀번호 방식을 유지한다. 소셜 로그인(구글·카카오 등)은 범위에 넣지 않는다(필요하면 별도 협의).
+- 결정: Spring Security의 OAuth2 Resource Server 기능(Nimbus JWT)으로 JWT를 **발급(`JwtEncoder`)** 하고 **검증(`JwtDecoder`)** 한다. 인증 정책(DEC-024: 60분, Bearer, Stateless, Refresh 제외)은 그대로다.
+- 의존성: `org.springframework.boot:spring-boot-starter-security-oauth2-resource-server` (버전은 Boot 관리). 옛 이름 `spring-boot-starter-oauth2-resource-server`는 4.2.0 POM 설명에 "deprecated in favor of spring-boot-starter-security-oauth2-resource-server"로 표시되어 있다 (Maven Central POM 직접 확인, 2026-11-27). 두 아티팩트 모두 4.2.0이 존재한다.
+- 대안(채택 안 함): jjwt, auth0 java-jwt (필터를 직접 만들어야 해서 코드가 길어짐).
+- 미확인: Resource Server 설정 문법과 HS256 대칭키 사용 시 세부(공식 문서 대조 전). 구현 중 확인해 `references.md`에 기록한다. 서명 비밀키는 `.env`로만 관리한다(`security.md`).
+- 구현 결과(2026-11-27, 개발자 직접 작성): `JwtConfig`(HS256 `JwtEncoder`·`JwtDecoder`), `JwtTokenProvider`(sub=회원 id, role, 만료 60분), 로그인 API, `RestSecurityExceptionHandler`(401·403), `JwtAuthenticationConverter`(role claim → `ROLE_`). 401/403은 `SecurityTest`(MockMvc)로 고정했다. 서명·만료 검증은 Postman으로 확인한다.
+- 시행착오: `@Value`의 `}` 누락(키가 리터럴 문자열이 되어 `KeyLengthException`), `.env`의 `JWT_SECRET` 빈 값(`Empty key`), 설정 키 이름 불일치(`jwt.expiration` ↔ `jwt.expiration-minutes`), 테스트 파일이 `src/main`에 위치.
+
+## DEC-029. 자동 테스트와 수동 시험 DB 분리는 배포 전에 정리
+
+- 상태: 제안 (2026-11-27)
+- 문제: 자동 테스트(`@SpringBootTest`)와 Postman 수동 시험이 같은 DB(`kix`)를 쓴다. 수동 시험으로 남은 `test@kix.com`이 `MemberRepositoryTest`를 `uk_members_email` 위반으로 실패시켰다(실제 발생, 원인은 DBeaver 수동 커밋 모드로 삭제가 반영되지 않은 것으로 추정).
+- 현재 방침: 수동 시험 계정은 쓴 뒤 지우고 DBeaver 트랜잭션 모드(Auto/Manual)를 확인한다.
+- 후속: 테스트 전용 DB 이름 사용(`testing.md` 4장) 또는 Testcontainers(선택)를 배포 전에 결정한다.
+
+## DEC-030. ChatGPT 병행 협업과 디자인 컨셉 승인
+
+- 상태: 확정 (2026-11-27, 사용자 지침). 승인일은 기록일 기준이며 ChatGPT에서 승인한 실제 날짜는 미확인.
+- 결정: 역할을 분담한다. 개발자는 의사결정·직접 코드·테스트·Git·배포, Claude Code는 개발 멘토링·리뷰·기록·승인된 디자인의 구현 안내, ChatGPT는 기획·기술 교차 검토와 브랜드·UI/UX·이미지·시안·포트폴리오를 맡는다. 공통 기준은 GitHub 저장소(`budurang22/kix-project`)와 `docs/`다.
+- 도구 간 메모리는 공유되지 않으므로 기존 `docs/` 파일과 `/wrap-up`으로 인수인계한다. 새 메모리 체계·Hook·설정은 만들지 않는다.
+- 디자인 컨셉(방향만 승인): 브랜드명 KIX, 슬로건 GET YOUR NEXT KICKS., #111111/#FFFFFF/#F4F4F4/#D5FA38/#EF4444, Pretendard 우선, 볼드 이탤릭 워드마크, 상품 카드 4/3/2열, 구매 버튼은 라임 배경+검은 텍스트. 상세는 `design/approved.md` 4장. 화면별 시안은 ChatGPT가 제작 예정이라 모두 "시안 없음" 유지.
+- 유지: 학습 모드(DEC-013), 브랜치 전략, 컨벤션, 공식 문서 기반 원칙. 시안 도착 전까지 백엔드를 계속한다(프런트 초기 환경 구성은 시안 없이 가능, `design-gate.md`).
+- 후속 검토(개발자 결정): 디자인 자료를 `docs/design-system` 브랜치로 분리 관리할지, 원본(`design/`)과 구현용 이미지(`frontend/`) 분리.
+- 영향: 요구사항에 없는 시안 속 기능은 개발자 확인 후에만 추가한다.
+
+## DEC-031. 역할 최종 분담: 프론트는 Codex, Claude Code는 백엔드 Learning Mode 유지 (DEC-030 보강)
+
+- 상태: 확정 (2026-11-28, 사용자 지시). "Claude Code가 프론트를 직접 구현"하는 안(검토만 하고 미적용)은 폐기했고 `settings.json`·가드의 프론트 차단은 그대로 유지한다.
+- 역할: 개발자 = 백엔드·DB·테스트·인프라·Git·배포 직접 수행 / Claude Code = 백엔드 학습 멘토링·코드 리뷰·기록 (프론트는 읽기 전용) / **Codex = `frontend/` 직접 개발 전담** / ChatGPT = 디자인, 기술 설계 교차 검토.
+- Codex는 별도 Git Worktree와 `feature/frontend-*` 브랜치에서 작업한다. Git 작업은 개발자가 한다.
+- API 계약: `docs/06-api-spec.md`가 프론트·백엔드의 기준이다. 인증은 JWT Bearer + React 메모리 저장(DEC-024) 유지.
+- 가드 변경(`guard.py`): ① 같은 저장소의 다른 worktree에도 동일한 수정 제한 적용 ② `cd`, 상대·절대 경로, `..`, 심볼릭 링크, `bash -c`·`eval`·`env` 래퍼, `find -delete`, 리다이렉션을 실경로로 판정. 검증: `.claude/hooks/test_guard.py`.
+- 범위: 이 가드는 Claude Code의 PreToolUse hook일 뿐이며 Codex·IDE·터미널을 제한하지 않는다.
+- 한계: `python -c`·`node -e` 같은 인라인 코드와 스크립트 파일 내부 동작은 정규식 수준으로만 거른다. 가드는 보안 경계가 아니라 실수 방지용이다.
