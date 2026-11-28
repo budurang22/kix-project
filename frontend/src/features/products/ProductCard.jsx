@@ -1,7 +1,10 @@
 import { Link } from 'react-router';
+import { useSampleCommerce } from '../../hooks/use-sample-commerce.js';
 import { isProductAvailable } from '../../utils/product-selection.js';
 import ProductImage from './ProductImage.jsx';
-export default function ProductCard({ product }) {
+export default function ProductCard({ product: source }) {
+  const { applyInventory } = useSampleCommerce();
+  const product = applyInventory(source);
   const isAvailable = isProductAvailable(product);
   return (
     <article className="min-w-0">

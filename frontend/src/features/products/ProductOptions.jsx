@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router';
+import { useAuth } from '../../hooks/use-auth.js';
+import { useSampleCommerce } from '../../hooks/use-sample-commerce.js';
 import Button from '../../components/Button.jsx';
 import {
   canSelectOption,
@@ -6,9 +9,28 @@ import {
   isProductAvailable,
 } from '../../utils/product-selection.js';
 export default function ProductOptions({ product }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { session } = useAuth();
+  const { beginOrder } = useSampleCommerce();
+  function handleSampleOrder() {
+    if (
+      !selected ||
+      !canSelectOption(product, selected) ||
+      quantity > selected.stock
+    )
+      return;
+    if (!session) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+    if (beginOrder(product, selected, quantity)) navigate('/orders/confirm');
+  }
   const [optionId, setOptionId] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const selected = product.options.find((option) => option.id === optionId);
+  const selected = product.options.find(
+    (option) => option.id === optionId && canSelectOption(product, option),
+  );
   const isAvailable = isProductAvailable(product);
   function handleSelect(option) {
     if (!canSelectOption(product, option)) return;
@@ -93,17 +115,22 @@ export default function ProductOptions({ product }) {
       )}
       <Button
         className="w-full"
-        disabled
+        disabled={
+          !selected ||
+          !canSelectOption(product, selected) ||
+          quantity > selected.stock
+        }
+        onClick={handleSampleOrder}
         aria-describedby="purchase-unavailable"
       >
-        구매 준비 중
+        샘플 주문 확인
       </Button>
       <p
         id="purchase-unavailable"
         className="text-sm leading-relaxed text-secondary"
       >
-        현재 상품은 샘플입니다. 실제 주문 기능과 최종 금액은 백엔드 연동 후
-        제공됩니다.
+        샘플 주문 체험만 가능합니다. 실제 주문·결제·배송은 발생하지 않습니다.
+        로그인이 필요하며 샘플 내역은 새로고침 시 사라집니다.
       </p>
     </div>
   );
