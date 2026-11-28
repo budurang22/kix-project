@@ -1,29 +1,31 @@
 # 진행 상황
 
-마지막 갱신: 2026-11-27 (ChatGPT 협업 방향 반영, DEC-030. 코드 상태는 `af560f1` 기준으로 소스와 대조함)
+마지막 갱신: 2026-11-28 (상품 조회 API 병합 반영. 코드 상태는 `develop` `1e96d7d`(PR #16) 기준으로 커밋 이력과 대조함)
 
 ## 0. 다음 세션 시작점 (먼저 읽기)
 
 - **영역별 현황 (DEC-031)**
-  - 백엔드(개발자 직접·Claude 멘토링): 인증까지 구현, 상품 조회 API 착수 전 (아래 상세).
-  - 프론트엔드(Codex 전담, Claude는 읽기 전용): 커밋·문서로 확인된 구현 없음. 2026-11-28 기준 `frontend/`는 `.gitkeep`뿐(미커밋). Codex 작업은 별도 worktree의 `feature/frontend-*` 브랜치에서 진행 예정이며 확인되면 여기에 기록한다.
+  - 백엔드(개발자 직접·Claude 멘토링): 인증과 **상품 조회 API(목록·상세) 병합 완료**(PR #16). 주문 도메인은 착수 전.
+  - 프론트엔드(Codex 전담, Claude는 읽기 전용): 커밋 이력으로 확인되는 병합 PR은 #6(`feature/frontend-init`), #14(`feature/frontend-quality`), #15(`feature/frontend-size-mm`). `frontend/src`에 products·orders·admin 기능 디렉터리가 있다. **구현 수준과 실제 동작은 미확인**(읽기 전용으로 파일·커밋만 확인함).
   - 디자인(ChatGPT): 컨셉 방향만 승인, 화면별 시안·로고·이미지 없음 (`design/approved.md`).
-  - 통합(API 연동 검증): 없음. 계약 기준은 `docs/06-api-spec.md`.
-- **현재 작업 디렉터리 브랜치**: 2026-11-28 확인 시 `feature/frontend-init`(개발자가 전환한 것으로 보임, 이 브랜치에 프론트 구현은 없음). 백엔드 파일 `RestSecurityExceptionHandler.java`가 수정된 상태로 미커밋이다. 백엔드 작업과 Codex 작업은 작업 디렉터리를 분리한다.
+  - 통합(API 연동 검증): 계약 기준은 `docs/06-api-spec.md` 3장. 프론트가 옵션 필드를 `sizeMm`으로 맞춘 커밋(`b508912`)은 확인했다. 프론트와 실제 백엔드를 붙여 동작을 확인한 기록은 없다(미확인).
+- **현재 작업 디렉터리 브랜치**: 2026-11-28 확인 시 `develop`(`1e96d7d`, 원격과 동기화). 백엔드 작업과 Codex 작업은 작업 디렉터리를 분리한다.
 
-- **현재 개발 단계**: 백엔드 — 인증까지 병합 완료, 상품 조회 API 착수 전. 소스 확인: `ProductController`·`ProductService`·상품 DTO는 **아직 없다**(`domain/product`에 entity·repository·exception만 있음). 주문 도메인(`domain/order`) 없음. 프론트엔드는 `frontend/.gitkeep`뿐(미착수, 시안 대기).
+- **현재 개발 단계**: 백엔드 — 인증과 상품 조회 API 병합 완료. 다음은 주문 도메인(`domain/order`, 아직 없음).
 - **협업**: ChatGPT(디자인·기획 교차 검토)와 병행한다(DEC-030). 디자인 컨셉은 방향만 승인(`design/approved.md` 4장), 화면별 시안은 전부 "시안 없음"이라 **시안을 기다리지 않고 백엔드를 계속한다**. 시안이 전달되면 `design/` 구조와 비교해 위치를 안내하고, 파일 이동·브랜치(`docs/design-system` 검토)·커밋은 개발자가 한다.
-- 브랜치: 현재 `develop`(최신 `af560f1`, PR #1~#5 병합 완료, 원격과 동기화). 진행 중인 기능 브랜치 없음 — `feature/auth-bearer` 등 기존 브랜치는 모두 병합됨. 다음 작업은 새 브랜치 `feature/product-api`에서 시작한다(개발자가 직접 생성).
-- **다음 작업**: ① 상품 조회 API(목록, 상세, 브랜드 필터) → ② 주문 생성(핵심 부분 TDD: 재고 차감, 가격 스냅샷, 멱등성, 동시성). 합의한 우선순위는 "백엔드 핵심 먼저, 프런트·배포는 마감 후"(추천안 A)이며 사용자의 최종 선택은 아직 받지 않았다(미확정). 마감 2026-11-30.
-- **시작 전 확인할 것**: `git status -sb`에서 `MemberRepositoryTest.java`가 스테이징된 삭제(`D `)로 보이면 `git restore --staged backend/src/test/java/com/kix/domain/member/repository/MemberRepositoryTest.java`로 취소한다(작업 폴더의 파일은 커밋 버전과 동일함을 확인했다). 다음 커밋에 삭제가 섞이는 것을 막기 위해서다.
-- 이 파일(`progress.md`)의 변경은 아직 커밋되지 않았다.
+- 브랜치: 현재 `develop`(`1e96d7d`, 원격과 동기화). 병합된 백엔드 PR은 #16(`feature/product-api`)까지다. 진행 중인 백엔드 기능 브랜치는 없다. 다음 작업은 새 브랜치(예: `feature/order`)에서 시작한다(개발자가 직접 생성).
+- **다음 작업**: 주문 생성(핵심 부분 TDD: 재고 차감, 가격 스냅샷, 멱등성, 동시성). 시작 전에 협의 대기 항목(아래, 3장)을 해소한다. 합의한 우선순위는 "백엔드 핵심 먼저, 프런트·배포는 마감 후"(추천안 A)이며 사용자의 최종 선택은 아직 받지 않았다(미확정). 마감 2026-11-30.
+- **이력 주의**: docs PR #7(`docs/collab-rules`)이 base 오설정으로 `main`에 병합됐다가 PR #8로 `develop`에 반영했다. PR을 만들 때 base 브랜치가 `develop`인지 화면 상단에서 확인한다.
 - 구현 완료(개발자 직접 작성, 테스트 17개 통과를 개발자가 실행해 보고함, 결과 파일로 확인):
   - DB: `V1__init.sql` 7개 테이블(DBeaver로 직접 실행), 로컬 MySQL 8.4.13 Compose
   - member: `Member`, `Role`, `MemberRepository`, 회원가입·로그인 API
   - product: `ProductOption.decreaseStock`(**TDD**, RED 5개 실패 → GREEN 5개 통과), `Brand`, `Product`, `ProductStatus`, Repository 3개 (엔티티 매핑 테스트는 구현 후 작성)
   - 인증: JWT 발급·검증(oauth2-resource-server, HS256, 60분, DEC-028), 401/403 핸들러, `/api/admin/**` ADMIN 전용, 임시 `GET /api/members/me`. 401/403은 `SecurityTest`(MockMvc 3개)로 고정
+  - **상품 조회 API (PR #16, 구현 후 테스트 추가, TDD 아님)**: `GET /api/products`(brandId·keyword·page·size, 최신순 고정), `GET /api/products/{id}`(옵션 `sizeMm` 순). `ProductService`(`soldOut` 서버 계산, 옵션을 상품 id 목록으로 한 번에 조회), `PageResponse`, 404·400 `ProblemDetail`, 상품 GET만 공개 허용. 테스트 `ProductControllerTest` 3개·`ProductRepositoryTest` 2개 추가. 계약은 `docs/06-api-spec.md` 3장
+  - 상품 조회 확인 상태: 개발자가 Postman으로 목록·브랜드 필터·키워드·페이징·상세·404·400이 기대대로라고 보고했고, `./gradlew cleanTest test`는 `BUILD SUCCESSFUL`이다(개발자 실행). `sizeMn` 오타를 일부러 넣었을 때 `ProductControllerTest`가 실패하는 것을 확인했다(22개 중 1개 실패 출력 확인). **목록 1회 호출 시 쿼리 3개(N+1 해소) 여부는 개발자의 로그 확인 결과를 아직 받지 못했다(미확인).**
+  - 상품 조회 한계: `size` 상한(제안 100)과 `sort` 파라미터는 미적용. 좋아요 수·내 좋아요 여부는 좋아요 도메인 후 추가. MockMvc는 `/error` 이동을 흉내 내지 않아서, 400이 `/error`를 거치며 401로 바뀌던 문제는 실제 서버 실행에서만 보였고 핸들러 추가로 해소했다(Postman으로 400 확인)
 - 확인 상태: Postman으로 가입 201·중복 409·입력 오류 400·로그인 200/401은 사용자가 예상대로라고 보고했다. **Bearer 토큰 실토큰 확인(없음 401, 정상 200, 위조 401, USER가 admin 403)은 사용자 결과 보고를 아직 받지 못했다(미확인).**
-- 학습 완료로 보기 어려운 것: 구현은 끝났지만 면접형 이해도 확인 질문은 아직 하지 않았다(재고 차감 TDD, JWT·401/403 구분 후 진행 권장).
+- 학습 완료로 보기 어려운 것: 구현은 끝났지만 면접형 이해도 확인 질문은 아직 하지 않았다(재고 차감 TDD, JWT·401/403 구분, 상품 조회의 N+1·`join fetch`·페이징 후 진행 권장).
 - 미해결: 자동 테스트와 수동 시험이 같은 DB를 써서 `test@kix.com` 잔여 데이터로 `MemberRepositoryTest`가 한 번 실패했다(DEC-029, 배포 전 정리). `@Transactional` 테스트는 롤백되지만 Postman 가입 데이터는 남으므로 시험 후 `DELETE ...; COMMIT;`(DBeaver Manual 커밋 주의).
 - 알려진 이력 흠: 커밋 `731b88a`의 메시지("Bearer 토큰 검증과 401/403")는 실제 내용(로그인·JWT 발급)과 다르다(병합된 이력이라 그대로 둠). Bearer 부분은 `6c6aac6`(PR #5).
 - 로컬 실행: 터미널은 루트에서 `set -a; source .env; set +a` 후 `./gradlew cleanTest test`. IntelliJ 앱 실행은 실행 설정의 Environment variables에 `MYSQL_USER`·`MYSQL_PASSWORD`·`MYSQL_DATABASE`·`JWT_SECRET`이 필요하다(값은 `.env`, 채팅에 붙이지 않는다).
@@ -70,8 +72,8 @@ AI 협업 환경과 공통 규칙 구성은 **마무리**했다. 신규 기술 �
 
 ## 5. 다음 작업
 
-1. (개발자) 시작 전 정리: 스테이징된 `MemberRepositoryTest` 삭제 취소(0장), `progress.md`·`CLAUDE.md`·`design/approved.md`·`design-gate.md`·`decisions.md` 문서 변경 커밋(`docs/` 브랜치 또는 기능 브랜치와 분리해 하나씩 확인)
-2. **상품 조회 API**(`feature/product-api`): 목록·상세·브랜드 필터. 구현 전에 요청·응답 JSON 먼저 설계
+1. ~~시작 전 정리, 상품 조회 API~~: 완료 (PR #16)
+2. (개발자) 이 문서 변경과 상품 조회 학습 기록을 `docs/*` 브랜치로 커밋·PR (base `develop`)
 3. **주문 생성**(부분 TDD): 재고 차감, 가격 스냅샷, 멱등성, 동시성. 직전에 협의 대기 항목(3장) 해소
 4. 핵심 기능 후 면접형 이해도 확인 질문(`learning-mode.md` 5장)
 5. 시안 전달 시: 화면 상태를 `design/approved.md`에서 확인 → 프론트 초기 환경 구성(Vite·Tailwind, 시안 없이 가능)은 백엔드 핵심 이후
