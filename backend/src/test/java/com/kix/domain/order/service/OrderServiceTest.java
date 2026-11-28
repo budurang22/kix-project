@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -84,4 +84,29 @@ public class OrderServiceTest {
                 member.getId(), Long.MAX_VALUE, 1, "key-0123456789abcdef"))
                 .isInstanceOf(ProductOptionNotFoundException.class);
     }
+
+    @Test
+    @DisplayName("같은 키와 같은 내용으로 다시 주문하면 기존 주문을 돌려주고 재고는 한 번만 차감된다")
+    void sameKeySameContent() {
+        // given
+        Member member = memberRepository.save(new Member("order-svc-3@kix.com", "hashed", "주문자"));
+        Brand brand = brandRepository.save(new Brand("TEST-ORDER-SVC-3"));
+        Product product = productRepository.save(new Product(brand, "덩크 로우", 139000, null, null));
+        ProductOption option = productOptionRepository.save(new ProductOption(product, 270, 5));
+        Order first = orderService.createOrder(member.getId(), option.getId(), 2, "key-0123456789abcdef");
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        Order second = orderService.createOrder(member.getId(), option.getId(), 2, "key-0123456789abcdef");
+        entityManager.flush();
+        entityManager.clear();
+
+        // then
+        assertThat(second.getId()).isEqualTo(first.getId());
+        assertThat(productOptionRepository.findById(option.getId()).orElseThrow().getStock())
+                .isEqualTo(3);
+        assertThat(orderRepository.findAllByMemberId(member.getId())).hasSize(1);
+    }
+
 }

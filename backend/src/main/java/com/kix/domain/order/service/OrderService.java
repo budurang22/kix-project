@@ -10,6 +10,8 @@ import com.kix.domain.product.repository.ProductOptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class OrderService {
 
@@ -28,6 +30,12 @@ public class OrderService {
         ProductOption option = productOptionRepository.findByIdForUpdate(productOptionId).orElseThrow(ProductOptionNotFoundException::new);
 
         Member member =memberRepository.findById(memberId).orElseThrow();
+
+        Optional<Order> existing = orderRepository.findByMemberIdAndIdempotencyKey(memberId, idempotencyKey);
+
+        if (existing.isPresent()) {
+            return existing.get();
+        }
 
         Order order = Order.create(member, option, quantity, idempotencyKey);
 
