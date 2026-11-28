@@ -9,6 +9,7 @@ import com.kix.domain.product.entity.ProductOption;
 import com.kix.domain.product.exception.ProductOptionNotFoundException;
 import com.kix.domain.product.repository.ProductOptionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class OrderService {
         this.productOptionRepository = productOptionRepository;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Order createOrder(Long memberId, Long productOptionId, int quantity, String idempotencyKey) {
         ProductOption option = productOptionRepository.findByIdForUpdate(productOptionId).orElseThrow(ProductOptionNotFoundException::new);
 
