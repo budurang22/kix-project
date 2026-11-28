@@ -39,7 +39,7 @@ test('SSR smoke: public routes, authenticated member, denied admin and unknown r
     assert.match(render('/admin', session), /접근 권한이 없습니다/);
     assert.match(
       render('/admin', { member: { id: '1', role: 'ADMIN' } }),
-      /상품·옵션 관리 준비 중/,
+      /관리자 샘플 상품/,
     );
     assert.match(render('/missing'), /페이지를 찾을 수 없습니다/);
   } finally {

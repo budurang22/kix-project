@@ -9,6 +9,9 @@ import ProductDetailPage from '../pages/ProductDetailPage.jsx';
 import AuthPage from '../pages/AuthPage.jsx';
 import AccountPage from '../pages/AccountPage.jsx';
 import PendingPage from '../pages/PendingPage.jsx';
+import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminProductsPage from '../pages/AdminProductsPage.jsx';
+import AdminProductEditorPage from '../pages/AdminProductEditorPage.jsx';
 import RequireAuth from './RequireAuth.jsx';
 export default function AppRoutes() {
   return (
@@ -30,10 +33,20 @@ export default function AppRoutes() {
             />
           </Route>
           <Route element={<RequireAuth role="ADMIN" />}>
-            <Route
-              path="admin/*"
-              element={<PendingPage title="상품·옵션 관리 준비 중" />}
-            />
+            <Route path="admin" element={<AdminLayout />}>
+              <Route index element={<AdminProductsPage />} />
+              <Route path="products/new" element={<AdminProductEditorPage />} />
+              <Route
+                path="products/:id/edit"
+                element={<AdminProductEditorPage />}
+              />
+              <Route
+                path="*"
+                element={
+                  <PendingPage title="관리자 페이지를 찾을 수 없습니다" />
+                }
+              />
+            </Route>
           </Route>
           <Route
             path="*"
