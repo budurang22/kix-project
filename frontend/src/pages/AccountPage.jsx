@@ -1,3 +1,4 @@
+import AccountEngagement from '../features/engagement/AccountEngagement.jsx';
 import { Link } from 'react-router';
 import { useAuth } from '../hooks/use-auth.js';
 import { useSampleCommerce } from '../hooks/use-sample-commerce.js';
@@ -50,6 +51,7 @@ export default function AccountPage() {
           상품 탐색
         </Link>
       </section>
+      <AccountEngagement />
       <p className="mt-12 border-t border-primary/15 pt-6 text-sm text-secondary">
         실제 주문 내역·좋아요·리뷰는 API 준비 후 제공됩니다.
       </p>

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useAuth } from '../../hooks/use-auth.js';
 import { createSampleOrderService } from '../../api/mocks/orders.js';
+import { createSampleEngagementService } from '../../api/mocks/engagement.js';
 import { createOrderIntent } from './order-intent.js';
 import { SampleCommerceContext } from './sample-commerce-context.js';
 export default function SampleCommerceBoundary({ children }) {
@@ -13,6 +14,24 @@ export default function SampleCommerceBoundary({ children }) {
 }
 function SampleCommerceProvider({ children }) {
   const [service] = useState(createSampleOrderService);
+  const [engagement] = useState(() =>
+    createSampleEngagementService({ hasPurchased: service.hasPurchased }),
+  );
+  const [likes, setLikes] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  async function setLiked(productId, isLiked) {
+    const result = await engagement.setLiked(productId, isLiked);
+    setLikes(result);
+    return result;
+  }
+  async function saveReview(input, options) {
+    const result = await engagement.saveReview(input, options);
+    setReviews((value) => [
+      result,
+      ...value.filter((review) => review.productId !== result.productId),
+    ]);
+    return result;
+  }
   const [draft, setDraft] = useState(null);
   const [orders, setOrders] = useState([]);
   const [inventory, setInventory] = useState({});
@@ -65,7 +84,17 @@ function SampleCommerceProvider({ children }) {
   }
   return (
     <SampleCommerceContext.Provider
-      value={{ draft, orders, beginOrder, submitOrder, applyInventory }}
+      value={{
+        draft,
+        orders,
+        beginOrder,
+        submitOrder,
+        applyInventory,
+        likes,
+        reviews,
+        setLiked,
+        saveReview,
+      }}
     >
       {children}
     </SampleCommerceContext.Provider>
