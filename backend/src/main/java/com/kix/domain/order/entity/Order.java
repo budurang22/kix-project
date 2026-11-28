@@ -9,6 +9,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
 @Entity
 @Table(name = "orders")
 @Getter
@@ -69,6 +74,7 @@ public class Order {
         order.member = member;
         order.productOption = productOption;
         order.productName = product.getName();
+        order.orderNumber = generateOrderNumber();
         order.sizeMm = productOption.getSizeMm();
         order.quantity = quantity;
         order.unitPrice = product.getPrice();
@@ -76,5 +82,11 @@ public class Order {
         order.status = OrderStatus.ORDERED;
         order.idempotencyKey = idempotencyKey;
         return order;
+    }
+
+    private static String generateOrderNumber() {
+        String date = LocalDate.now(ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.BASIC_ISO_DATE);
+        String random = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        return "ORD-" + date + "-" + random;
     }
 }

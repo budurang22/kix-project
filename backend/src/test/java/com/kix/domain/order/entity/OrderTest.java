@@ -123,4 +123,21 @@ public class OrderTest {
                 .isInstanceOf(InsufficientStockException.class);
         assertThat(option.getStock()).isEqualTo(1);
     }
+
+    @Test
+    @DisplayName("주문을 만들면 ORD-날짜-8자리 형식의 주문번호가 생성되고 주문마다 다르다")
+    void createOrderNumber() {
+        // given
+        Product product = new Product(new Brand("Nike"), "덩크 로우", 139000, null, null);
+        ProductOption option = new ProductOption(product, 270, 5);
+        Member member = new Member("buyer@kix.com", "hashed", "구매자");
+
+        // when
+        Order first = Order.create(member, option, 1, "key-0123456789abcdef");
+        Order second = Order.create(member, option, 1, "key-fedcba9876543210");
+
+        // then
+        assertThat(first.getOrderNumber()).matches("ORD-\\d{8}-[A-Z0-9]{8}");
+        assertThat(first.getOrderNumber()).isNotEqualTo(second.getOrderNumber());
+    }
 }
